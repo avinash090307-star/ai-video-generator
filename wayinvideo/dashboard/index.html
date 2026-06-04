@@ -604,6 +604,220 @@
         .toast.show {
             transform: translateY(0);
         }
+
+        /* Clip Actions Styling */
+        .clip-actions {
+            display: flex;
+            gap: 6px;
+            margin-top: 15px;
+            border-top: 1px solid var(--border-color);
+            padding-top: 12px;
+        }
+
+        .btn-clip-action {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-main);
+            padding: 8px 4px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .btn-clip-action:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.15);
+        }
+
+        .btn-clip-action.download:hover {
+            color: var(--primary);
+            border-color: var(--border-hover);
+            background: rgba(30, 215, 96, 0.08);
+        }
+
+        .btn-clip-action.share:hover {
+            color: var(--accent-purple);
+            border-color: rgba(140, 82, 255, 0.3);
+            background: rgba(140, 82, 255, 0.08);
+        }
+
+        .btn-clip-action.youtube:hover {
+            color: #ff4444;
+            border-color: rgba(255, 68, 68, 0.3);
+            background: rgba(255, 68, 68, 0.08);
+        }
+
+        /* Modal Overlay Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(8px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal-content-dialog {
+            background: #0e100d;
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            width: 90%;
+            max-width: 480px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            position: relative;
+            animation: modalFadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes modalFadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .modal-close-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            font-size: 20px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .modal-close-btn:hover {
+            color: #fff;
+        }
+
+        .modal-header h3 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .modal-header p {
+            color: var(--text-muted);
+            font-size: 13px;
+            margin-bottom: 20px;
+        }
+
+        .modal-body {
+            margin-bottom: 20px;
+        }
+
+        /* Modal Form Elements */
+        .modal-input-group {
+            margin-bottom: 15px;
+            text-align: left;
+        }
+
+        .modal-input-group label {
+            display: block;
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+            font-weight: 600;
+        }
+
+        .modal-input {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 12px;
+            color: #fff;
+            font-size: 14px;
+            outline: none;
+            transition: var(--transition);
+        }
+
+        .modal-input:focus {
+            border-color: var(--primary);
+        }
+
+        /* Progress Bar for YouTube Modal */
+        .progress-container {
+            background: rgba(255, 255, 255, 0.05);
+            height: 10px;
+            border-radius: 9999px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+
+        .progress-bar {
+            background: linear-gradient(90deg, var(--primary), var(--accent-purple));
+            width: 0%;
+            height: 100%;
+            transition: width 0.15s ease-out;
+        }
+
+        /* Share Platform Grid */
+        .share-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin: 20px 0;
+        }
+
+        .share-platform-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 15px 10px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .share-platform-btn:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: var(--border-hover);
+        }
+
+        .share-icon-large {
+            font-size: 24px;
+        }
+
+        .share-platform-name {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        /* QR Code Simulation */
+        .qr-placeholder {
+            background: #fff;
+            padding: 10px;
+            border-radius: 10px;
+            width: 120px;
+            height: 120px;
+            margin: 20px auto 10px auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .qr-placeholder svg {
+            width: 100px;
+            height: 100px;
+        }
     </style>
 </head>
 <body>
@@ -640,6 +854,9 @@
                     <h4 id="user-name-display">Premium User</h4>
                     <span>Pro Account</span>
                 </div>
+            </div>
+            <div style="font-size: 10px; color: var(--text-muted); margin-top: 15px; text-align: center; border-top: 1px solid var(--border-color); padding-top: 10px; line-height: 1.4;">
+                © 2026 ai.video.generater<br>All copyrights clear.
             </div>
         </div>
     </div>
@@ -728,6 +945,17 @@
                                 <span>Duration: 0:42</span>
                                 <span class="clip-score">Viral Score: 98%</span>
                             </div>
+                            <div class="clip-actions">
+                                <button class="btn-clip-action download" onclick="downloadClip(1)">
+                                    <span>📥</span> Download
+                                </button>
+                                <button class="btn-clip-action share" onclick="openShareModal(1)">
+                                    <span>🔗</span> Share
+                                </button>
+                                <button class="btn-clip-action youtube" onclick="openYoutubeUploadModal(1)">
+                                    <span>🎥</span> YouTube
+                                </button>
+                            </div>
                         </div>
                     </div>
 
@@ -743,6 +971,17 @@
                                 <span>Duration: 0:58</span>
                                 <span class="clip-score">Viral Score: 94%</span>
                             </div>
+                            <div class="clip-actions">
+                                <button class="btn-clip-action download" onclick="downloadClip(2)">
+                                    <span>📥</span> Download
+                                </button>
+                                <button class="btn-clip-action share" onclick="openShareModal(2)">
+                                    <span>🔗</span> Share
+                                </button>
+                                <button class="btn-clip-action youtube" onclick="openYoutubeUploadModal(2)">
+                                    <span>🎥</span> YouTube
+                                </button>
+                            </div>
                         </div>
                     </div>
 
@@ -757,6 +996,17 @@
                             <div class="clip-meta">
                                 <span>Duration: 0:35</span>
                                 <span class="clip-score">Viral Score: 89%</span>
+                            </div>
+                            <div class="clip-actions">
+                                <button class="btn-clip-action download" onclick="downloadClip(3)">
+                                    <span>📥</span> Download
+                                </button>
+                                <button class="btn-clip-action share" onclick="openShareModal(3)">
+                                    <span>🔗</span> Share
+                                </button>
+                                <button class="btn-clip-action youtube" onclick="openYoutubeUploadModal(3)">
+                                    <span>🎥</span> YouTube
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -836,7 +1086,142 @@
     </div>
 
     <!-- Notification Toast -->
-    <div id="toast-notify" class="toast">Action completed successfully!</div>
+    <!-- Share Modal -->
+    <div id="share-modal" class="modal-overlay" onclick="if(event.target === this) closeShareModal()">
+        <div class="modal-content-dialog">
+            <button class="modal-close-btn" onclick="closeShareModal()">×</button>
+            <div class="modal-header">
+                <h3>Share Clip</h3>
+                <p>Share this AI viral clip with your network</p>
+            </div>
+            <div class="modal-body">
+                <div class="modal-input-group">
+                    <label for="share-url-input">Direct Clip Link</label>
+                    <div style="display: flex; gap: 8px;">
+                        <input type="text" id="share-url-input" class="modal-input" readonly value="">
+                        <button class="btn-action" onclick="copyShareLink()" style="padding: 0 16px;">Copy</button>
+                    </div>
+                </div>
+                
+                <div class="share-grid">
+                    <button class="share-platform-btn" onclick="shareOnPlatform('twitter')">
+                        <span class="share-icon-large">🐦</span>
+                        <span class="share-platform-name">Twitter / X</span>
+                    </button>
+                    <button class="share-platform-btn" onclick="shareOnPlatform('whatsapp')">
+                        <span class="share-icon-large">💬</span>
+                        <span class="share-platform-name">WhatsApp</span>
+                    </button>
+                    <button class="share-platform-btn" onclick="shareOnPlatform('facebook')">
+                        <span class="share-icon-large">👥</span>
+                        <span class="share-platform-name">Facebook</span>
+                    </button>
+                    <button class="share-platform-btn" onclick="shareOnPlatform('email')">
+                        <span class="share-icon-large">✉️</span>
+                        <span class="share-platform-name">Email</span>
+                    </button>
+                </div>
+                
+                <p style="text-align: center; font-size: 12px; color: var(--text-muted); margin-top: 15px;">Scan QR code to open on mobile:</p>
+                <div class="qr-placeholder">
+                    <svg viewBox="0 0 100 100">
+                        <rect x="0" y="0" width="100" height="100" fill="white"/>
+                        <rect x="10" y="10" width="30" height="30" fill="black"/>
+                        <rect x="15" y="15" width="20" height="20" fill="white"/>
+                        <rect x="20" y="20" width="10" height="10" fill="black"/>
+                        <rect x="60" y="10" width="30" height="30" fill="black"/>
+                        <rect x="65" y="15" width="20" height="20" fill="white"/>
+                        <rect x="70" y="20" width="10" height="10" fill="black"/>
+                        <rect x="10" y="60" width="30" height="30" fill="black"/>
+                        <rect x="15" y="65" width="20" height="20" fill="white"/>
+                        <rect x="20" y="70" width="10" height="10" fill="black"/>
+                        <rect x="50" y="20" width="5" height="10" fill="black"/>
+                        <rect x="45" y="40" width="15" height="5" fill="black"/>
+                        <rect x="10" y="45" width="10" height="5" fill="black"/>
+                        <rect x="70" y="50" width="10" height="15" fill="black"/>
+                        <rect x="50" y="60" width="5" height="25" fill="black"/>
+                        <rect x="60" y="80" width="15" height="10" fill="black"/>
+                        <rect x="80" y="70" width="10" height="10" fill="black"/>
+                    </svg>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- YouTube Upload Modal -->
+    <div id="yt-upload-modal" class="modal-overlay" onclick="if(event.target === this) closeYoutubeUploadModal()">
+        <div class="modal-content-dialog">
+            <button class="modal-close-btn" onclick="closeYoutubeUploadModal()">×</button>
+            <div class="modal-header">
+                <h3>Upload to YouTube Channel</h3>
+                <p>Directly publish your cropped clip as a YouTube Short</p>
+            </div>
+            
+            <!-- Step 1: Authorization -->
+            <div id="yt-step-auth" class="modal-body">
+                <p style="font-size: 14px; margin-bottom: 20px; line-height: 1.5; color: var(--text-muted);">
+                    Connect your YouTube account to publish shorts directly. AI generated animated subtitles will be burned into the output.
+                </p>
+                <div class="modal-input-group">
+                    <label for="yt-channel-select">Choose YouTube Channel</label>
+                    <select id="yt-channel-select" class="modal-input" style="background: rgba(255,255,255,0.05); color: #fff; cursor: pointer;">
+                        <option value="main">My Main Channel (Google Account)</option>
+                        <option value="clips">Viral Clips Feed (Official)</option>
+                        <option value="test">Sandbox Account (Drafts Only)</option>
+                    </select>
+                </div>
+                <button class="btn-submit" id="yt-auth-btn" onclick="authorizeYoutube()" style="margin-top: 15px; background: #ff4444; color: white; border: none; font-weight: 700; width: 100%; padding: 14px; border-radius: 10px; cursor: pointer; transition: var(--transition);">
+                    🔒 Connect & Authorize Channel
+                </button>
+            </div>
+
+            <!-- Step 2: Metadata Details -->
+            <div id="yt-step-upload" class="modal-body" style="display: none;">
+                <div class="modal-input-group">
+                    <label for="yt-title-input">Short Title</label>
+                    <input type="text" id="yt-title-input" class="modal-input" value="">
+                </div>
+                <div class="modal-input-group">
+                    <label for="yt-desc-input">Description</label>
+                    <textarea id="yt-desc-input" class="modal-input" rows="3" style="resize: none;">AI video generator clipper result. Captions styled with dynamic AI templates.</textarea>
+                </div>
+                <div class="modal-input-group">
+                    <label for="yt-visibility-select">Visibility</label>
+                    <select id="yt-visibility-select" class="modal-input" style="background: rgba(255,255,255,0.05); color: #fff;">
+                        <option value="public">Public (Immediately Viewable)</option>
+                        <option value="unlisted">Unlisted (Link sharing only)</option>
+                        <option value="private">Private (Only you can view)</option>
+                    </select>
+                </div>
+                <button class="btn-submit" onclick="startYoutubeUpload()" style="margin-top: 15px; background: #ff4444; color: white; border: none; font-weight: 700; width: 100%; padding: 14px; border-radius: 10px; cursor: pointer; transition: var(--transition);">
+                    🚀 Publish to Channel
+                </button>
+            </div>
+
+            <!-- Step 3: Progress Bar -->
+            <div id="yt-step-progress" class="modal-body" style="display: none; text-align: center;">
+                <p style="font-size: 15px; font-weight: 600; margin-bottom: 10px;">Rendering subtitles & uploading to YouTube...</p>
+                <div class="progress-container">
+                    <div id="yt-progress-bar" class="progress-bar"></div>
+                </div>
+                <p id="yt-progress-percent" style="font-weight: 700; color: var(--primary);">0%</p>
+            </div>
+
+            <!-- Step 4: Success Message -->
+            <div id="yt-step-success" class="modal-body" style="display: none; text-align: center;">
+                <div style="font-size: 48px; margin-bottom: 15px;">🎉</div>
+                <h4 style="font-size: 18px; font-weight: 700; margin-bottom: 8px;">Video Published!</h4>
+                <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px;">
+                    Your short has been uploaded and captions are rendered successfully.
+                </p>
+                <div class="modal-input-group">
+                    <label>YouTube Link</label>
+                    <input type="text" class="modal-input" readonly value="https://youtube.com/shorts/dQw4w9WgXcQ" style="text-align: center; color: var(--primary); font-weight: 600;">
+                </div>
+                <button class="btn-secondary" onclick="closeYoutubeUploadModal()" style="width: 100%; margin-top: 15px; padding: 12px; border-radius: 10px;">Done</button>
+            </div>
+        </div>
+    </div>
 
     <script>
         // Check for user login details
@@ -844,6 +1229,24 @@
             const userName = localStorage.getItem('user_name') || 'Premium User';
             document.getElementById('user-name-display').textContent = userName;
             document.getElementById('user-avatar').textContent = userName.charAt(0).toUpperCase();
+
+            // Check for active tab in query parameters
+            const urlParams = new URLSearchParams(window.location.search);
+            const tabParam = urlParams.get('tab');
+            if (tabParam) {
+                const navItems = {
+                    'overview': 0,
+                    'clipper': 1,
+                    'summarizer': 2,
+                    'captions': 3,
+                    'api': 4
+                };
+                const index = navItems[tabParam];
+                if (index !== undefined) {
+                    const el = document.querySelectorAll('.nav-item')[index];
+                    switchTab(tabParam, el);
+                }
+            }
         });
 
         // Tab Switching Logic
@@ -969,7 +1372,7 @@
             const placeholder = document.getElementById('clip-placeholder-' + clipNum);
             const playBtn = document.getElementById('play-btn-' + clipNum);
 
-            // Remove any other playing clip's iframe
+            // Remove any other playing clip's iframe & reset default caption text
             if (playingClipNum && playingClipNum !== clipNum) {
                 const oldContainer = document.getElementById('clip-preview-container-' + playingClipNum);
                 const oldIframe = oldContainer.querySelector('iframe');
@@ -980,6 +1383,19 @@
                 
                 const oldPlayBtn = document.getElementById('play-btn-' + playingClipNum);
                 if (oldPlayBtn) oldPlayBtn.style.display = 'flex';
+
+                const defaultCaptions = {
+                    1: "Why focus is the key",
+                    2: "The $10B Secret Strategy",
+                    3: "Don't do it alone"
+                };
+                const oldCaption = document.getElementById('caption-preview-' + playingClipNum);
+                if (oldCaption) {
+                    oldCaption.innerHTML = `"${defaultCaptions[playingClipNum]}"`;
+                    if (typeof updateCaptionElementStyle === 'function') {
+                        updateCaptionElementStyle(oldCaption);
+                    }
+                }
             }
 
             // Start times for mock segments (different segments of the YouTube video)
@@ -996,7 +1412,10 @@
             container.appendChild(iframe);
             
             playingClipNum = clipNum;
-            showToast(`Streaming clip #${clipNum} inside vertical frame...`);
+            if (typeof startCaptionAnimation === 'function') {
+                startCaptionAnimation(clipNum);
+            }
+            showToast(`Streaming clip #${clipNum} inside vertical frame with synced captions...`);
         }
 
         // Summarizer Run Simulation
@@ -1022,40 +1441,266 @@
             }, 1500);
         }
 
+        let activeCaptionStyle = 'Hormozi';
+        let captionTimeouts = [];
+
+        // Dynamic Captions Data for each clip
+        const clipCaptions = {
+            1: [
+                { time: 0, text: "If you want to build <span style='color:#1ed760'>SOMETHING BIG</span>" },
+                { time: 2000, text: "You have to <span style='color:#ffff00'>FOCUS</span>" },
+                { time: 4000, text: "Narrow down your <span style='color:#8c52ff'>SCOPE</span>" },
+                { time: 6000, text: "To a single product feature" },
+                { time: 8500, text: "And iterate <span style='color:#1ed760'>10X FASTER</span>" },
+                { time: 11000, text: "Than any competitor" },
+                { time: 13500, text: "That is your <span style='color:#ffff00'>SUPERPOWER!</span>" }
+            ],
+            2: [
+                { time: 0, text: "The secret to <span style='color:#1ed760'>OPTIMIZATION</span>" },
+                { time: 2500, text: "Is finding customer <span style='color:#ffff00'>DEMAND</span>" },
+                { time: 5000, text: "Before building complex systems" },
+                { time: 7500, text: "Establish short <span style='color:#8c52ff'>FEEDBACK LOOPS</span>" },
+                { time: 10500, text: "And distribute organically" },
+                { time: 13000, text: "Through vertical channels!" }
+            ],
+            3: [
+                { time: 0, text: "Do not try to build <span style='color:#ffff00'>ALONE</span>" },
+                { time: 2000, text: "Find partners who share your <span style='color:#1ed760'>VISION</span>" },
+                { time: 4500, text: "And divide execution roles" },
+                { time: 7000, text: "Keep communication transparent" },
+                { time: 9500, text: "And run fast <span style='color:#8c52ff'>DAILY STANDUPS</span>" },
+                { time: 12500, text: "To align goals." }
+            ]
+        };
+
+        function startCaptionAnimation(clipNum) {
+            captionTimeouts.forEach(clearTimeout);
+            captionTimeouts = [];
+
+            const captions = clipCaptions[clipNum];
+            if (!captions) return;
+
+            const captionEl = document.getElementById('caption-preview-' + clipNum);
+            if (!captionEl) return;
+
+            updateCaptionElementStyle(captionEl);
+
+            const duration = 16000;
+
+            const runSequence = () => {
+                captions.forEach(cap => {
+                    const to = setTimeout(() => {
+                        let text = cap.text;
+                        if (activeCaptionStyle === 'Hormozi') {
+                            text = text.toUpperCase();
+                        }
+                        captionEl.innerHTML = `"${text}"`;
+                    }, cap.time);
+                    captionTimeouts.push(to);
+                });
+            };
+
+            runSequence();
+            const interval = setInterval(() => {
+                if (playingClipNum !== clipNum) {
+                    clearInterval(interval);
+                    return;
+                }
+                captionTimeouts.forEach(clearTimeout);
+                captionTimeouts = [];
+                runSequence();
+            }, duration);
+        }
+
+        function updateCaptionElementStyle(el) {
+            if (!el) return;
+            if (activeCaptionStyle === 'Hormozi') {
+                el.style.color = '#ffff00';
+                el.style.textTransform = 'uppercase';
+                el.style.fontWeight = '900';
+                el.style.fontFamily = "'Space Grotesk', sans-serif";
+                el.style.textShadow = '0 2px 4px rgba(0,0,0,0.9)';
+            } else if (activeCaptionStyle === 'MrBeast') {
+                el.style.color = '#ffffff';
+                el.style.textTransform = 'none';
+                el.style.fontWeight = '800';
+                el.style.fontFamily = "'Outfit', sans-serif";
+                el.style.textShadow = '2px 2px 0px #000, -2px -2px 0px #000, 2px -2px 0px #000, -2px 2px 0px #000, 0 4px 8px rgba(0,0,0,0.6)';
+            } else {
+                el.style.color = '#1ed760';
+                el.style.textTransform = 'none';
+                el.style.fontWeight = '500';
+                el.style.fontFamily = 'sans-serif';
+                el.style.textShadow = 'none';
+            }
+        }
+
         // Captions Style selector
         function setCaptionStyle(name, color, transform) {
+            activeCaptionStyle = name;
             const cap1 = document.getElementById('caption-preview-1');
             const cap2 = document.getElementById('caption-preview-2');
             const cap3 = document.getElementById('caption-preview-3');
 
             [cap1, cap2, cap3].forEach(cap => {
                 if (cap) {
-                    cap.style.color = color;
-                    cap.style.textTransform = transform;
-                    if (name === 'Hormozi') {
-                        cap.style.fontWeight = '900';
-                        cap.style.fontFamily = "'Space Grotesk', sans-serif";
-                    } else if (name === 'MrBeast') {
-                        cap.style.fontWeight = '800';
-                        cap.style.fontFamily = "'Outfit', sans-serif";
-                    } else {
-                        cap.style.fontWeight = '400';
-                        cap.style.fontFamily = 'sans-serif';
+                    updateCaptionElementStyle(cap);
+                    // Also trigger update of content immediately if not playing
+                    if (!playingClipNum) {
+                        const defaultCaptions = {
+                            'caption-preview-1': "Why focus is the key",
+                            'caption-preview-2': "The $10B Secret Strategy",
+                            'caption-preview-3': "Don't do it alone"
+                        };
+                        let txt = defaultCaptions[cap.id];
+                        if (activeCaptionStyle === 'Hormozi') {
+                            txt = txt.toUpperCase();
+                        }
+                        cap.innerHTML = `"${txt}"`;
                     }
                 }
             });
             showToast('Applied ' + name + ' caption template!');
         }
 
-        // Regenerate API keys
-        function regenerateApiKey() {
-            const chars = 'abcdef0123456789';
-            let key = 'avg_live_';
-            for (let i = 0; i < 24; i++) {
-                key += chars.charAt(Math.floor(Math.random() * chars.length));
+        // Download Simulation Function (works 100% offline)
+        function downloadClip(clipNum) {
+            const btn = document.querySelector(`.clip-card:nth-child(${clipNum}) .btn-clip-action.download`);
+            const originalText = btn.innerHTML;
+            btn.innerHTML = "<span>⏳</span> Preparing...";
+            btn.disabled = true;
+
+            setTimeout(() => {
+                const dummyData = new Blob(["MOCK_MP4_VIDEO_STREAM_DATA"], { type: "video/mp4" });
+                const url = URL.createObjectURL(dummyData);
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = `ai_video_generater_clip_${clipNum}.mp4`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+                showToast(`Downloaded clip #${clipNum} successfully!`);
+            }, 1200);
+        }
+
+        // Share Dialog Functions
+        function openShareModal(clipNum) {
+            const shareUrl = `${window.location.origin}${window.location.pathname.replace('wayinvideo/dashboard/index.html', '')}?clip=${clipNum}`;
+            document.getElementById('share-url-input').value = shareUrl;
+            document.getElementById('share-modal').style.display = 'flex';
+        }
+
+        function closeShareModal() {
+            document.getElementById('share-modal').style.display = 'none';
+        }
+
+        function copyShareLink() {
+            const input = document.getElementById('share-url-input');
+            input.select();
+            try {
+                navigator.clipboard.writeText(input.value);
+                showToast("Link copied to clipboard!");
+            } catch (err) {
+                document.execCommand('copy');
+                showToast("Link copied to clipboard!");
             }
-            document.getElementById('api-key-val').textContent = key;
-            showToast('Regenerated Developer API Key!');
+        }
+
+        function shareOnPlatform(platform) {
+            const shareUrl = encodeURIComponent(document.getElementById('share-url-input').value);
+            const text = encodeURIComponent("Check out this awesome AI generated short clip!");
+            let url = "";
+            if (platform === 'twitter') {
+                url = `https://twitter.com/intent/tweet?url=${shareUrl}&text=${text}`;
+            } else if (platform === 'whatsapp') {
+                url = `https://api.whatsapp.com/send?text=${text}%20${shareUrl}`;
+            } else if (platform === 'facebook') {
+                url = `https://www.facebook.com/sharer/sharer.php?u=${shareUrl}`;
+            } else if (platform === 'email') {
+                url = `mailto:?subject=${text}&body=${shareUrl}`;
+            }
+            
+            if (url) {
+                window.open(url, '_blank');
+                showToast(`Sharing on ${platform}...`);
+            }
+        }
+
+        // YouTube Direct Upload Simulation Functions
+        let currentUploadingClipNum = null;
+
+        function openYoutubeUploadModal(clipNum) {
+            currentUploadingClipNum = clipNum;
+            const titleField = document.getElementById('yt-title-input');
+            const defaultTitles = {
+                1: "Focus is your Superpower #shorts #motivation",
+                2: "Unlocking Scale Optimization #shorts #startup",
+                3: "The Power of Collaboration #shorts #business"
+            };
+            titleField.value = defaultTitles[clipNum] || "AI Clip #shorts";
+            
+            document.getElementById('yt-upload-modal').style.display = 'flex';
+            resetYoutubeUploadModal();
+        }
+
+        function closeYoutubeUploadModal() {
+            document.getElementById('yt-upload-modal').style.display = 'none';
+        }
+
+        function resetYoutubeUploadModal() {
+            document.getElementById('yt-step-auth').style.display = 'block';
+            document.getElementById('yt-step-upload').style.display = 'none';
+            document.getElementById('yt-step-progress').style.display = 'none';
+            document.getElementById('yt-step-success').style.display = 'none';
+        }
+
+        function authorizeYoutube() {
+            const authBtn = document.getElementById('yt-auth-btn');
+            authBtn.textContent = "Connecting Channel...";
+            authBtn.disabled = true;
+            
+            setTimeout(() => {
+                document.getElementById('yt-step-auth').style.display = 'none';
+                document.getElementById('yt-step-upload').style.display = 'block';
+                authBtn.textContent = "🔒 Connect & Authorize Channel";
+                authBtn.disabled = false;
+            }, 1200);
+        }
+
+        function startYoutubeUpload() {
+            const title = document.getElementById('yt-title-input').value.trim();
+            if (!title) {
+                alert("Please enter a video title.");
+                return;
+            }
+            
+            document.getElementById('yt-step-upload').style.display = 'none';
+            document.getElementById('yt-step-progress').style.display = 'block';
+            
+            const bar = document.getElementById('yt-progress-bar');
+            const percentText = document.getElementById('yt-progress-percent');
+            bar.style.width = '0%';
+            percentText.textContent = '0%';
+            
+            let pct = 0;
+            const interval = setInterval(() => {
+                pct += 5;
+                bar.style.width = pct + '%';
+                percentText.textContent = pct + '%';
+                
+                if (pct >= 100) {
+                    clearInterval(interval);
+                    setTimeout(() => {
+                        document.getElementById('yt-step-progress').style.display = 'none';
+                        document.getElementById('yt-step-success').style.display = 'block';
+                        showToast("Short successfully published to YouTube channel!");
+                    }, 400);
+                }
+            }, 100);
         }
 
         // Show toast notification

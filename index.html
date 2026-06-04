@@ -73,15 +73,34 @@
 <script>
     (function() {
         // Fix Tab Title
-        document.title = "ai.video.generater - #1 AI Video Generator - Fast, Online, Free";
+        const desiredTitle = "ai.video.generater - #1 AI Video Generator - Fast, Online, Free";
+        document.title = desiredTitle;
         
+        // Continuous title enforcer
+        setInterval(() => {
+            if (document.title !== desiredTitle) {
+                document.title = desiredTitle;
+            }
+        }, 200);
+
+        // Inject styles to hide any React / Ant Design network modals
+        try {
+            const style = document.createElement('style');
+            style.textContent = `
+                .ant-modal-root, .wv-modal-root, .ant-modal-wrap, .wv-modal-wrap, .ant-modal-mask, .wv-modal-mask, .ant-modal, .wv-modal {
+                    display: none !important;
+                }
+            `;
+            document.head.appendChild(style);
+        } catch (e) {}
+
         // Handle login redirect query param
         const params = new URLSearchParams(window.location.search);
         if (params.get('logged_in') === 'true') {
             localStorage.setItem('user_logged_in', 'true');
         }
         
-        // Bypassing React event capturing to prevent "Network Disconnected" modal
+        // Bypassing React event capturing to prevent "Network Disconnected" modal on click
         document.addEventListener('click', function(e) {
             let target = e.target;
             while (target && target.tagName !== 'A' && target.tagName !== 'BUTTON') {
@@ -93,18 +112,39 @@
                 const href = target.tagName === 'A' ? target.getAttribute('href') : '';
                 const isLoggedIn = localStorage.getItem('user_logged_in') === 'true';
                 
+                // Intercept any clicks to wayin.ai URLs or tool links to prevent redirection leaks!
+                if (href && (href.includes('wayin.ai') || href.startsWith('/') || href.includes('tools/'))) {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    
+                    // Route to correct local tab
+                    let tab = 'overview';
+                    if (href.includes('summarizer') || text.includes('summariz')) {
+                        tab = 'summarizer';
+                    } else if (href.includes('clipper') || href.includes('reframe') || text.includes('clip') || text.includes('reframe')) {
+                        tab = 'clipper';
+                    } else if (href.includes('caption') || text.includes('caption') || text.includes('subtitle')) {
+                        tab = 'captions';
+                    } else if (href.includes('api') || text.includes('api')) {
+                        tab = 'api';
+                    } else if (href.includes('pricing') || text.includes('pricing') || text.includes('plan')) {
+                        window.location.href = 'wayinvideo/pricing/index.html';
+                        return;
+                    }
+                    
+                    if (isLoggedIn) {
+                        window.location.href = `wayinvideo/dashboard/index.html?tab=${tab}`;
+                    } else {
+                        window.location.href = 'wayinvideo/login/index.html';
+                    }
+                    return;
+                }
+
                 // 1. Intercept Google Auth clicks rendered by React on the landing page
                 if (text.includes('google') && (text.includes('continue') || text.includes('sign') || text.includes('log') || text.includes('up') || text.includes('in') || text.includes('oauth'))) {
                     e.stopPropagation();
                     e.preventDefault();
-                    
-                    // Log in as mock Google user directly
-                    localStorage.setItem('user_logged_in', 'true');
-                    localStorage.setItem('user_email', 'google.user@generater.ai');
-                    localStorage.setItem('user_name', 'Google User');
-                    localStorage.setItem('user_tier', 'Pro');
-                    
-                    window.location.href = 'wayinvideo/dashboard/index.html';
+                    window.location.href = 'wayinvideo/login/index.html?provider=google';
                     return;
                 }
                 
@@ -117,7 +157,7 @@
                 }
                 
                 // 3. Intercept any other Authentication or Dashboard link clicks
-                if (text === 'login' || text === 'sign in' || text === 'log in' || 
+                if (text === 'login' || text === 'sign in' || text === 'log in' || text === 'sign up' ||
                     text === 'get started' || text === 'try for free' || 
                     text === 'try wayinvideo free' || text === 'try ai.video.generater free') {
                     
@@ -128,7 +168,7 @@
                         window.location.href = 'wayinvideo/dashboard/index.html';
                     } else {
                         // Redirect to local mock login page
-                        if (text.includes('get started') || text.includes('free')) {
+                        if (text.includes('get started') || text.includes('free') || text.includes('sign up')) {
                             window.location.href = 'wayinvideo/login/index.html?signup=true';
                         } else {
                             window.location.href = 'wayinvideo/login/index.html';
@@ -146,8 +186,55 @@
             }
         }, true); // Crucial: useCapture = true catches the event before React intercepts it!
         
+        // Continuous cleaner for network disconnected popup (automatic)
+        const cleanNetworkErrors = () => {
+            if (!document.body) return;
+            
+            // Hide Ant Design and custom modals without breaking React DOM structure
+            const selectors = ['.ant-modal-root', '.wv-modal-root', '.ant-modal-wrap', '.wv-modal-wrap', '.ant-modal-mask', '.wv-modal-mask'];
+            selectors.forEach(sel => {
+                document.querySelectorAll(sel).forEach(el => {
+                    el.style.setProperty('display', 'none', 'important');
+                    el.style.setProperty('pointer-events', 'none', 'important');
+                });
+            });
+            
+            // Hide elements containing "Network Disconnected"
+            const walker = document.createTreeWalker(
+                document.body,
+                NodeFilter.SHOW_TEXT,
+                null,
+                false
+            );
+            let node;
+            const nodesToInspect = [];
+            while (node = walker.nextNode()) {
+                if (node.nodeValue.includes('Network Disconnected') || node.nodeValue.includes('network is disconnected') || node.nodeValue.includes('network settings')) {
+                    nodesToInspect.push(node);
+                }
+            }
+            nodesToInspect.forEach(textNode => {
+                let parent = textNode.parentElement;
+                while (parent && parent !== document.body) {
+                    if (parent.tagName === 'DIV' && (parent.className.includes('modal') || parent.className.includes('popup') || parent.className.includes('dialog') || parent.style.position === 'fixed' || parent.style.zIndex > 500)) {
+                        parent.style.setProperty('display', 'none', 'important');
+                        parent.style.setProperty('pointer-events', 'none', 'important');
+                        break;
+                    }
+                    parent = parent.parentElement;
+                }
+            });
+            
+            // Ensure body scrolling is active and mouse interaction is not blocked
+            document.body.style.setProperty('overflow', 'auto', 'important');
+            document.body.style.setProperty('pointer-events', 'auto', 'important');
+            document.documentElement.style.setProperty('overflow', 'auto', 'important');
+        };
+        setInterval(cleanNetworkErrors, 100);
+
         // Dynamic DOM text replacer
         const applyRebrand = () => {
+            if (!document.body) return; // head loading check
             const isLoggedIn = localStorage.getItem('user_logged_in') === 'true';
             
             const walker = document.createTreeWalker(
@@ -188,13 +275,7 @@
             }
         };
         
-        applyRebrand();
-        
-        const rebrandInterval = setInterval(applyRebrand, 300);
-        setTimeout(() => {
-            clearInterval(rebrandInterval);
-            setInterval(applyRebrand, 1500);
-        }, 20000);
+        setInterval(applyRebrand, 300);
     })();
 </script>
 </body></html>

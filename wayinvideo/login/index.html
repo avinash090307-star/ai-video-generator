@@ -237,16 +237,132 @@
             color: var(--primary-hover);
         }
 
-        /* Mock Notice */
-        .mock-notice {
-            margin-top: 20px;
-            padding: 10px;
-            background: rgba(30, 215, 96, 0.08);
-            border: 1px dashed rgba(30, 215, 96, 0.3);
-            border-radius: 8px;
+        /* Google Account Chooser Modal */
+        .google-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(5px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .google-modal {
+            background: #141414;
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            width: 90%;
+            max-width: 400px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            text-align: center;
+            animation: gModalIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+
+        @keyframes gModalIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .google-modal-close {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        .google-modal-header {
+            margin-bottom: 25px;
+        }
+
+        .google-icon-wrapper {
+            margin: 0 auto 15px auto;
+            width: 40px;
+            height: 40px;
+            background: #fff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .google-modal-title {
+            font-size: 22px;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 6px;
+        }
+
+        .google-modal-subtitle {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .google-account-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .google-account-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: left;
+        }
+
+        .google-account-item:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .google-avatar-circle {
+            width: 32px;
+            height: 32px;
+            background: var(--accent);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 14px;
+            color: #fff;
+        }
+
+        .google-account-details h5 {
+            font-size: 14px;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .google-account-details span {
             font-size: 12px;
-            color: var(--primary);
-            line-height: 1.4;
+            color: var(--text-secondary);
+        }
+
+        .google-custom-account-form {
+            display: none;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid var(--border-color);
+            text-align: left;
         }
     </style>
 </head>
@@ -306,6 +422,62 @@
         </div>
     </div>
 
+    <!-- Google Account Chooser Modal -->
+    <div id="google-chooser-modal" class="google-modal-overlay" onclick="if(event.target === this) closeGoogleChooser()">
+        <div class="google-modal">
+            <button class="google-modal-close" onclick="closeGoogleChooser()">×</button>
+            <div class="google-modal-header">
+                <div class="google-icon-wrapper">
+                    <svg viewBox="0 0 24 24" width="24" height="24" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                        <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                        <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" fill="#FBBC05"/>
+                        <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" fill="#EA4335"/>
+                    </svg>
+                </div>
+                <h3 class="google-modal-title">Choose an account</h3>
+                <p class="google-modal-subtitle">to continue to <strong style="color: #fff;">ai.video.generater</strong></p>
+            </div>
+            
+            <div class="google-account-list">
+                <div class="google-account-item" onclick="loginWithGoogleAccount('Abhi', 'abhi@generater.ai')">
+                    <div class="google-avatar-circle" style="background: #8c52ff;">A</div>
+                    <div class="google-account-details">
+                        <h5>Abhi</h5>
+                        <span>abhi@generater.ai</span>
+                    </div>
+                </div>
+                
+                <div class="google-account-item" onclick="loginWithGoogleAccount('Avinash', 'avinash@generater.ai')">
+                    <div class="google-avatar-circle" style="background: #1ed760;">A</div>
+                    <div class="google-account-details">
+                        <h5>Avinash</h5>
+                        <span>avinash@generater.ai</span>
+                    </div>
+                </div>
+                
+                <div class="google-account-item" onclick="showCustomGoogleAccountForm()">
+                    <div class="google-avatar-circle" style="background: rgba(255,255,255,0.1); color: var(--text-secondary);">+</div>
+                    <div class="google-account-details">
+                        <h5>Use another account</h5>
+                        <span>Sign in with a different Google account</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Custom Account Form -->
+            <div id="google-custom-form" class="google-custom-account-form">
+                <div class="form-group" style="text-align: left;">
+                    <label for="google-custom-email">Google Email address</label>
+                    <input type="email" id="google-custom-email" placeholder="name@gmail.com" style="margin-bottom: 10px; background: rgba(255,255,255,0.05); border: 1px solid var(--border-color); border-radius: 10px; color: #fff;">
+                    <label for="google-custom-name" style="margin-top: 10px;">Your Name</label>
+                    <input type="text" id="google-custom-name" placeholder="John Doe" style="margin-bottom: 15px; background: rgba(255,255,255,0.05); border: 1px solid var(--border-color); border-radius: 10px; color: #fff;">
+                    <button type="button" class="btn-submit" onclick="loginWithCustomGoogleAccount()" style="background-color: var(--accent); color: #fff; box-shadow: 0 4px 12px rgba(140,82,255,0.3); border: none; font-weight: 700; width: 100%; padding: 12px; border-radius: 10px; cursor: pointer;">Sign In</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         // Check for signup parameter in URL
         const urlParams = new URLSearchParams(window.location.search);
@@ -356,13 +528,34 @@
         }
 
         function handleGoogleLogin() {
-            // Save mock google user in localStorage
-            localStorage.setItem('user_logged_in', 'true');
-            localStorage.setItem('user_email', 'google.user@generater.ai');
-            localStorage.setItem('user_name', 'Google User');
+            document.getElementById('google-chooser-modal').style.display = 'flex';
+        }
 
-            // Redirect back to homepage with logged_in=true
+        function closeGoogleChooser() {
+            document.getElementById('google-chooser-modal').style.display = 'none';
+        }
+
+        function loginWithGoogleAccount(name, email) {
+            localStorage.setItem('user_logged_in', 'true');
+            localStorage.setItem('user_email', email);
+            localStorage.setItem('user_name', name);
+            localStorage.setItem('user_tier', 'Pro'); // Grant pro tier
+
             window.location.href = '../../index.html?logged_in=true';
+        }
+
+        function showCustomGoogleAccountForm() {
+            document.getElementById('google-custom-form').style.display = 'block';
+        }
+
+        function loginWithCustomGoogleAccount() {
+            const email = document.getElementById('google-custom-email').value.trim();
+            const name = document.getElementById('google-custom-name').value.trim();
+            if (!email || !name) {
+                alert("Please enter both email and name.");
+                return;
+            }
+            loginWithGoogleAccount(name, email);
         }
 
         function handleGiftCodeLogin() {
@@ -382,6 +575,11 @@
 
         // Initialize UI
         updateUI();
+
+        // Check if redirected directly to Google Login
+        if (urlParams.get('provider') === 'google') {
+            handleGoogleLogin();
+        }
     </script>
 </body>
 </html>
