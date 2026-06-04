@@ -1710,12 +1710,17 @@
         }
 
         function authorizeYoutube() {
-            const channelUrl = document.getElementById('yt-channel-url').value.trim();
+            let channelUrl = document.getElementById('yt-channel-url').value.trim();
             const authBtn = document.getElementById('yt-auth-btn');
             
             if (!channelUrl) {
                 alert("Please enter your YouTube Channel Link first.");
                 return;
+            }
+
+            // Clean and force absolute URL prefix to prevent relative 404 pages on GitHub Pages
+            if (!/^https?:\/\//i.test(channelUrl)) {
+                channelUrl = 'https://' + channelUrl;
             }
             
             // Parse channel handle or ID for display
