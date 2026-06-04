@@ -911,9 +911,10 @@
                 <h2 style="font-family: 'Space Grotesk', sans-serif; font-size: 28px; margin-bottom: 8px;">Long-to-Short AI Clipper</h2>
                 <p style="color: var(--text-muted); margin-bottom: 30px;">Input any long video link to automatically crop and format into vertical virals.</p>
 
-                <div class="input-group">
-                    <input type="text" class="input-field" id="clipper-url" placeholder="Paste YouTube link here... (e.g. https://www.youtube.com/watch?v=dQw4w9WgXcQ)" value="https://www.youtube.com/watch?v=dQw4w9WgXcQ">
+                <div class="input-group" style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    <input type="text" class="input-field" id="clipper-url" placeholder="Paste YouTube link here... (e.g. https://www.youtube.com/watch?v=dQw4w9WgXcQ)" value="https://www.youtube.com/watch?v=dQw4w9WgXcQ" style="min-width: 250px;">
                     <button class="btn-action" onclick="runClipper()">Generate Clips</button>
+                    <button id="download-full-video-btn" class="btn-secondary" onclick="downloadFullVideo()">📥 Download Full Video</button>
                 </div>
 
                 <!-- Progress Bar -->
@@ -1930,6 +1931,72 @@
             setTimeout(() => {
                 toast.classList.remove('show');
             }, 3000);
+        }
+
+        // Download full YouTube video using high-speed Cobalt API
+        async function getRealYouTubeDownloadUrl(youtubeUrl) {
+            const instances = [
+                "https://api.cobalt.tools/api/json",
+                "https://cobalt.api.ryuko.space/api/json"
+            ];
+            
+            for (let instance of instances) {
+                try {
+                    const response = await fetch(instance, {
+                        method: 'POST',
+                        headers: {
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            url: youtubeUrl,
+                            videoQuality: "720",
+                            filenamePattern: "basic"
+                        })
+                    });
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        if (data && data.url) {
+                            return data.url;
+                        }
+                    }
+                } catch (e) {
+                    console.warn(`Cobalt instance ${instance} failed:`, e);
+                }
+            }
+            
+            // Fallback redirect link
+            const videoId = getYouTubeId(youtubeUrl);
+            return `https://en.savefrom.net/#url=https://youtube.com/watch?v=${videoId}`;
+        }
+
+        async function downloadFullVideo() {
+            const urlInput = document.getElementById('clipper-url').value.trim();
+            const videoId = getYouTubeId(urlInput);
+            if (!videoId) {
+                alert("Please enter a valid YouTube Video link.");
+                return;
+            }
+            
+            const btn = document.getElementById('download-full-video-btn');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = "<span>⏳</span> Generating Link...";
+            btn.disabled = true;
+            
+            showToast("Generating direct full video download link...");
+            
+            try {
+                const downloadUrl = await getRealYouTubeDownloadUrl(urlInput);
+                window.open(downloadUrl, "_blank");
+                showToast("Download opened successfully!");
+            } catch (err) {
+                console.error(err);
+                window.open(`https://en.savefrom.net/#url=${urlInput}`, "_blank");
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
         }
 
         // Log out
