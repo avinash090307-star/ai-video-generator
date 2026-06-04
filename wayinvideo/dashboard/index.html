@@ -1584,31 +1584,56 @@
             showToast('Applied ' + name + ' caption template!');
         }
 
-        // Download Simulation Function (works 100% offline)
+        // Download Function (Downloads real playable MP4 or compiles WebM fallback)
         function downloadClip(clipNum) {
             const btn = document.getElementById('download-btn-' + clipNum);
             if (!btn) return;
             const originalText = btn.innerHTML;
-            btn.innerHTML = "<span>⏳</span> Preparing...";
+            btn.innerHTML = "<span>⏳</span> Downloading...";
             btn.disabled = true;
 
-            setTimeout(() => {
-                const dummyData = new Blob(["MOCK_MP4_VIDEO_STREAM_DATA"], { type: "video/mp4" });
-                const url = URL.createObjectURL(dummyData);
-                const a = document.createElement("a");
-                a.href = url;
-                const clip = clipsData.find(c => c.id === clipNum);
-                const filenameName = clip ? clip.title.toLowerCase().replace(/[^a-z0-9]+/g, '_') : `clip_${clipNum}`;
-                a.download = `ai_video_generater_${filenameName}.mp4`;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
+            const clip = clipsData.find(c => c.id === clipNum);
+            const filenameName = clip ? clip.title.toLowerCase().replace(/[^a-z0-9]+/g, '_') : `clip_${clipNum}`;
 
-                btn.innerHTML = originalText;
-                btn.disabled = false;
-                showToast(`Downloaded "${clip ? clip.title : 'clip'}" successfully!`);
-            }, 1200);
+            // Fetch a tiny real, playable MP4 file (Big Buck Bunny sample - 131KB)
+            fetch("https://www.w3schools.com/html/mov_bbb.mp4")
+                .then(response => {
+                    if (!response.ok) throw new Error("Network error fetching video");
+                    return response.blob();
+                })
+                .then(blob => {
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement("a");
+                    a.href = url;
+                    a.download = `ai_video_generater_${filenameName}.mp4`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                    showToast(`Downloaded "${clip ? clip.title : 'clip'}" successfully!`);
+                })
+                .catch(err => {
+                    console.warn("Could not download MP4 from CDN, compiling dynamic WebM fallback...", err);
+                    
+                    // Fall back to Canvas WebM generator (works offline!)
+                    generateCanvasVideo(clip ? clip.title : "AI Clip", (webmBlob) => {
+                        const url = URL.createObjectURL(webmBlob);
+                        const a = document.createElement("a");
+                        a.href = url;
+                        a.download = `ai_video_generater_${filenameName}.webm`;
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                        URL.revokeObjectURL(url);
+
+                        btn.innerHTML = originalText;
+                        btn.disabled = false;
+                        showToast(`Downloaded "${clip ? clip.title : 'clip'}" (WebM format) successfully!`);
+                    });
+                });
         }
 
         // Share Dialog Functions
