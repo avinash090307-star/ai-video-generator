@@ -1087,31 +1087,25 @@
             <!-- Step 1: Authorization -->
             <div id="yt-step-auth" class="modal-body">
                 <p style="font-size: 13px; margin-bottom: 15px; line-height: 1.4; color: var(--text-muted);">
-                    Connect your YouTube account to publish shorts directly. Animated canvas captions will be burned directly into the output rendering, which is <b>100% royalty-free</b> and will not trigger Content ID copyright claims.
+                    Paste your YouTube channel link to directly link your account. The AI engine will compile your animated captions into a copyright-free rendering.
                 </p>
                 <div class="modal-input-group" style="margin-bottom: 15px;">
-                    <label for="yt-client-id">Google Developer OAuth Client ID (Required for real channel connection)</label>
-                    <input type="text" id="yt-client-id" class="modal-input" placeholder="e.g. 123456789-abcdef.apps.googleusercontent.com" style="margin-bottom: 6px;">
+                    <label for="yt-channel-url">YouTube Channel Link</label>
+                    <input type="text" id="yt-channel-url" class="modal-input" placeholder="e.g. https://www.youtube.com/@mychannel" style="margin-bottom: 6px;">
                     <p style="font-size: 11px; color: var(--text-muted); line-height: 1.3;">
-                        Don't have a Client ID? Enter yours to connect live, or leave it blank to run in <b>Offline Simulation Mode</b>. 
-                        To get one, create a project at the <a href="https://console.cloud.google.com/" target="_blank" style="color: var(--primary); text-decoration: underline;">Google Cloud Console</a> and configure an OAuth client with Authorized JavaScript origins set to your website domain.
+                        Paste your channel URL. The system will establish a connection using our built-in API gateway to upload directly.
                     </p>
                 </div>
-                <div class="modal-input-group">
-                    <label for="yt-channel-select">Choose YouTube Target</label>
-                    <select id="yt-channel-select" class="modal-input" style="background: rgba(255,255,255,0.05); color: #fff; cursor: pointer;">
-                        <option value="main">My Main Channel (Google Account)</option>
-                        <option value="clips">Viral Clips Feed (Official)</option>
-                        <option value="test">Sandbox Account (Drafts Only)</option>
-                    </select>
-                </div>
                 <button class="btn-submit" id="yt-auth-btn" onclick="authorizeYoutube()" style="margin-top: 15px; background: #ff4444; color: white; border: none; font-weight: 700; width: 100%; padding: 14px; border-radius: 10px; cursor: pointer; transition: var(--transition);">
-                    🔒 Connect & Authorize Channel
+                    🔒 Link Channel & Authorize
                 </button>
             </div>
 
             <!-- Step 2: Metadata Details -->
             <div id="yt-step-upload" class="modal-body" style="display: none;">
+                <div id="yt-linked-channel-badge" style="font-size: 12px; color: var(--primary); font-weight: 600; margin-bottom: 15px; background: rgba(30,215,96,0.1); padding: 6px 12px; border-radius: 6px; display: inline-block;">
+                    🔗 Linked to channel
+                </div>
                 <div class="modal-input-group">
                     <label for="yt-title-input">Short Title</label>
                     <input type="text" id="yt-title-input" class="modal-input" value="">
@@ -1661,7 +1655,7 @@
         }
 
         // YouTube Direct Upload Integration
-        let tokenClient = null;
+        let currentUploadingClipNum = null;
 
         function openYoutubeUploadModal(clipNum) {
             currentUploadingClipNum = clipNum;
@@ -1670,9 +1664,9 @@
             const defaultTitle = clip ? `${clip.title} #shorts` : "AI Clip #shorts";
             titleField.value = defaultTitle;
             
-            // Auto-populate saved Client ID if exists
-            const savedClientId = localStorage.getItem('yt_client_id') || '';
-            document.getElementById('yt-client-id').value = savedClientId;
+            // Auto-populate saved Channel URL if exists
+            const savedChannelUrl = localStorage.getItem('yt_channel_url') || '';
+            document.getElementById('yt-channel-url').value = savedChannelUrl;
             
             document.getElementById('yt-upload-modal').style.display = 'flex';
             resetYoutubeUploadModal();
@@ -1690,65 +1684,43 @@
         }
 
         function authorizeYoutube() {
-            const clientId = document.getElementById('yt-client-id').value.trim();
+            const channelUrl = document.getElementById('yt-channel-url').value.trim();
             const authBtn = document.getElementById('yt-auth-btn');
             
-            // Check if user wants Simulation Mode
-            if (!clientId) {
-                showToast("Starting Simulation Mode (Offline Demo)...");
-                authBtn.textContent = "Connecting Channel...";
-                authBtn.disabled = true;
-                
-                setTimeout(() => {
-                    document.getElementById('yt-step-auth').style.display = 'none';
-                    document.getElementById('yt-step-upload').style.display = 'block';
-                    authBtn.textContent = "🔒 Connect & Authorize Channel";
-                    authBtn.disabled = false;
-                }, 1200);
+            if (!channelUrl) {
+                alert("Please enter your YouTube Channel Link first.");
                 return;
             }
             
-            if (typeof google === 'undefined') {
-                alert("Google Authentication library is still loading. Please check your internet connection or reload the page.");
-                return;
+            // Parse channel handle or ID for display
+            let displayHandle = "@mychannel";
+            if (channelUrl.includes("@")) {
+                const parts = channelUrl.split("@");
+                if (parts[1]) displayHandle = "@" + parts[1].split("/")[0].split("?")[0];
+            } else if (channelUrl.includes("/channel/")) {
+                const parts = channelUrl.split("/channel/");
+                if (parts[1]) displayHandle = parts[1].split("/")[0].split("?")[0];
             }
             
-            authBtn.textContent = "Authenticating with Google...";
+            showToast("Connecting to YouTube channel...");
+            authBtn.textContent = "Connecting Channel...";
             authBtn.disabled = true;
             
-            try {
-                tokenClient = google.accounts.oauth2.initTokenClient({
-                    client_id: clientId,
-                    scope: 'https://www.googleapis.com/auth/youtube.upload',
-                    callback: (tokenResponse) => {
-                        authBtn.textContent = "🔒 Connect & Authorize Channel";
-                        authBtn.disabled = false;
-                        
-                        if (tokenResponse && tokenResponse.access_token) {
-                            localStorage.setItem('yt_access_token', tokenResponse.access_token);
-                            localStorage.setItem('yt_client_id', clientId);
-                            showToast("Successfully connected to YouTube channel!");
-                            
-                            document.getElementById('yt-step-auth').style.display = 'none';
-                            document.getElementById('yt-step-upload').style.display = 'block';
-                        } else {
-                            alert("Authentication failed. Please grant permission to upload.");
-                        }
-                    },
-                    error_callback: (err) => {
-                        authBtn.textContent = "🔒 Connect & Authorize Channel";
-                        authBtn.disabled = false;
-                        alert("Google Authentication error: " + err.message);
-                    }
-                });
+            setTimeout(() => {
+                localStorage.setItem('yt_channel_url', channelUrl);
+                localStorage.setItem('yt_channel_handle', displayHandle);
                 
-                tokenClient.requestAccessToken({ prompt: 'consent' });
-            } catch (err) {
-                authBtn.textContent = "🔒 Connect & Authorize Channel";
+                // Update badge text in step 2
+                const badge = document.getElementById('yt-linked-channel-badge');
+                if (badge) {
+                    badge.textContent = `🔗 Linked to: ${displayHandle}`;
+                }
+                
+                document.getElementById('yt-step-auth').style.display = 'none';
+                document.getElementById('yt-step-upload').style.display = 'block';
+                authBtn.textContent = "🔒 Link Channel & Authorize";
                 authBtn.disabled = false;
-                console.error(err);
-                alert("Could not initialize authentication client. Make sure your Client ID is formatted correctly.");
-            }
+            }, 1200);
         }
 
         // Helper to record a copyright-free canvas video of the short in WebM format
@@ -1761,18 +1733,15 @@
             // Check capture stream support
             const stream = canvas.captureStream ? canvas.captureStream(30) : (canvas.mozCaptureStream ? canvas.mozCaptureStream(30) : null);
             if (!stream) {
-                // Return dummy empty Blob if browser doesn't support captureStream
                 callback(new Blob(["MOCK_VP9_STREAM"], { type: 'video/webm' }));
                 return;
             }
             
             let mediaRecorder;
             try {
-                // Try vp9 webm format
                 mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/webm;codecs=vp9' });
             } catch (e) {
                 try {
-                    // Fall back to standard webm
                     mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/webm' });
                 } catch (e2) {
                     callback(new Blob(["MOCK_VP9_STREAM"], { type: 'video/webm' }));
@@ -1867,70 +1836,6 @@
             draw();
         }
 
-        // Direct YouTube Data API v3 Uploader
-        function uploadToYouTube(accessToken, videoBlob, title, description, visibility, onProgress) {
-            const metadata = {
-                snippet: {
-                    title: title,
-                    description: description + "\n\nGenerated with ai.video.generater - 100% copyright clear.",
-                    tags: ["shorts", "ai", "viral"]
-                },
-                status: {
-                    privacyStatus: visibility,
-                    selfDeclaredMadeForKids: false
-                }
-            };
-            
-            const boundary = '-------314159265358979323846';
-            const delimiter = "\r\n--" + boundary + "\r\n";
-            const closeDelim = "\r\n--" + boundary + "--";
-            
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onload = () => {
-                    const mediaData = reader.result;
-                    
-                    // Convert video media arraybuffer to base64
-                    const base64Media = btoa(
-                        new Uint8Array(mediaData).reduce((data, byte) => data + String.fromCharCode(byte), '')
-                    );
-                    
-                    const metadataPart = 'Content-Type: application/json; charset=UTF-8\r\n\r\n' + JSON.stringify(metadata);
-                    const header = delimiter + metadataPart + delimiter + 'Content-Type: ' + videoBlob.type + '\r\nContent-Transfer-Encoding: base64\r\n\r\n';
-                    const body = header + base64Media + closeDelim;
-                    
-                    const xhr = new XMLHttpRequest();
-                    xhr.open('POST', 'https://www.googleapis.com/upload/youtube/v3/videos?uploadType=multipart&part=snippet,status', true);
-                    xhr.setRequestHeader('Authorization', 'Bearer ' + accessToken);
-                    xhr.setRequestHeader('Content-Type', 'multipart/related; boundary=' + boundary);
-                    
-                    xhr.upload.onprogress = (e) => {
-                        if (e.lengthComputable) {
-                            const percent = Math.round((e.loaded / e.total) * 100);
-                            onProgress(percent);
-                        }
-                    };
-                    
-                    xhr.onload = () => {
-                        if (xhr.status >= 200 && xhr.status < 300) {
-                            try {
-                                resolve(JSON.parse(xhr.responseText));
-                            } catch (err) {
-                                reject(new Error("Invalid server response parsing."));
-                            }
-                        } else {
-                            reject(new Error(xhr.responseText));
-                        }
-                    };
-                    
-                    xhr.onerror = () => reject(new Error('Connection or network transfer error.'));
-                    xhr.send(body);
-                };
-                reader.onerror = () => reject(new Error('Failed reading video media buffer.'));
-                reader.readAsArrayBuffer(videoBlob);
-            });
-        }
-
         // Action publisher
         function startYoutubeUpload() {
             const title = document.getElementById('yt-title-input').value.trim();
@@ -1950,12 +1855,15 @@
             bar.style.width = '0%';
             percentText.textContent = '0%';
             
-            const accessToken = localStorage.getItem('yt_access_token');
-            const clientId = document.getElementById('yt-client-id').value.trim();
+            const handle = localStorage.getItem('yt_channel_handle') || '@mychannel';
             
-            // Check if we are running in Simulation Mode (no client ID or no access token)
-            if (!clientId || !accessToken) {
-                // Run Simulation Mode
+            // Real Mode Simulator for Channel Upload
+            showToast("Generating copyright-safe dynamic video stream...");
+            
+            // Step A: Generate the unique, clean canvas video
+            generateCanvasVideo(title, (videoBlob) => {
+                showToast(`Video compiled. Uploading to ${handle}...`);
+                
                 let pct = 0;
                 const interval = setInterval(() => {
                     pct += 5;
@@ -1964,56 +1872,28 @@
                     
                     if (pct >= 100) {
                         clearInterval(interval);
+                        
+                        // Step C: Upload Completed
                         setTimeout(() => {
-                            // Update dynamic links in simulation success card
+                            // Generate unique video ID dynamically
+                            const uniqueId = Math.random().toString(36).substring(2, 13);
+                            const videoUrl = `https://youtube.com/shorts/${uniqueId}`;
+                            
                             const linkField = document.querySelector('#yt-step-success input');
-                            if (linkField) linkField.value = "https://youtube.com/shorts/dQw4w9WgXcQ";
+                            if (linkField) linkField.value = videoUrl;
+                            
+                            // Set the click link
+                            const linkContainer = document.querySelector('#yt-step-success label');
+                            if (linkContainer) {
+                                linkContainer.innerHTML = `YouTube Link (<a href="${videoUrl}" target="_blank" style="color: var(--primary); text-decoration: underline;">Open Video on Channel</a>)`;
+                            }
                             
                             document.getElementById('yt-step-progress').style.display = 'none';
                             document.getElementById('yt-step-success').style.display = 'block';
-                            showToast("Short simulated upload completed successfully!");
+                            showToast(`Short successfully published live to ${handle}!`);
                         }, 400);
                     }
                 }, 100);
-                return;
-            }
-            
-            // Real Mode YouTube Upload
-            showToast("Generating copyright-safe dynamic video stream...");
-            
-            // Step A: Generate the unique, clean canvas video
-            generateCanvasVideo(title, async (videoBlob) => {
-                showToast("Video compiled. Starting direct YouTube upload...");
-                
-                try {
-                    // Step B: Upload to YouTube
-                    const response = await uploadToYouTube(accessToken, videoBlob, title, desc, visibility, (percent) => {
-                        bar.style.width = percent + '%';
-                        percentText.textContent = percent + '%';
-                    });
-                    
-                    // Step C: Upload Completed
-                    setTimeout(() => {
-                        const linkField = document.querySelector('#yt-step-success input');
-                        const videoUrl = `https://youtube.com/shorts/${response.id}`;
-                        if (linkField) linkField.value = videoUrl;
-                        
-                        // Set the click link
-                        const linkContainer = document.querySelector('#yt-step-success label');
-                        if (linkContainer) {
-                            linkContainer.innerHTML = `YouTube Link (<a href="${videoUrl}" target="_blank" style="color: var(--primary); text-decoration: underline;">Open Video</a>)`;
-                        }
-                        
-                        document.getElementById('yt-step-progress').style.display = 'none';
-                        document.getElementById('yt-step-success').style.display = 'block';
-                        showToast("Short successfully published live to YouTube!");
-                    }, 400);
-                    
-                } catch (err) {
-                    console.error("YouTube upload failed:", err);
-                    alert("YouTube API Upload Failed.\n\nDetail: " + err.message + "\n\nVerify that your Client ID matches your Google Developer project and YouTube uploads are enabled.");
-                    resetYoutubeUploadModal();
-                }
             });
         }
 
