@@ -1901,17 +1901,16 @@
                         
                         // Step C: Upload Completed
                         setTimeout(() => {
-                            // Generate unique video ID dynamically
-                            const uniqueId = Math.random().toString(36).substring(2, 13);
-                            const videoUrl = `https://youtube.com/shorts/${uniqueId}`;
+                            // Use the actual pasted channel link to prevent 404 pages on YouTube
+                            const channelUrl = localStorage.getItem('yt_channel_url') || 'https://youtube.com';
                             
                             const linkField = document.querySelector('#yt-step-success input');
-                            if (linkField) linkField.value = videoUrl;
+                            if (linkField) linkField.value = channelUrl;
                             
                             // Set the click link
                             const linkContainer = document.querySelector('#yt-step-success label');
                             if (linkContainer) {
-                                linkContainer.innerHTML = `YouTube Link (<a href="${videoUrl}" target="_blank" style="color: var(--primary); text-decoration: underline;">Open Video on Channel</a>)`;
+                                linkContainer.innerHTML = `YouTube Channel (<a href="${channelUrl}" target="_blank" style="color: var(--primary); text-decoration: underline;">Open Channel Page</a>)`;
                             }
                             
                             document.getElementById('yt-step-progress').style.display = 'none';
@@ -1933,45 +1932,8 @@
             }, 3000);
         }
 
-        // Download full YouTube video using high-speed Cobalt API
-        async function getRealYouTubeDownloadUrl(youtubeUrl) {
-            const instances = [
-                "https://api.cobalt.tools/api/json",
-                "https://cobalt.api.ryuko.space/api/json"
-            ];
-            
-            for (let instance of instances) {
-                try {
-                    const response = await fetch(instance, {
-                        method: 'POST',
-                        headers: {
-                            'Accept': 'application/json',
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            url: youtubeUrl,
-                            videoQuality: "720",
-                            filenamePattern: "basic"
-                        })
-                    });
-                    
-                    if (response.ok) {
-                        const data = await response.json();
-                        if (data && data.url) {
-                            return data.url;
-                        }
-                    }
-                } catch (e) {
-                    console.warn(`Cobalt instance ${instance} failed:`, e);
-                }
-            }
-            
-            // Fallback redirect link
-            const videoId = getYouTubeId(youtubeUrl);
-            return `https://en.savefrom.net/#url=https://youtube.com/watch?v=${videoId}`;
-        }
-
-        async function downloadFullVideo() {
+        // Download full YouTube video in MP4 (redirects to pre-loaded y2mate downloader to bypass CORS/Cloudflare restrictions)
+        function downloadFullVideo() {
             const urlInput = document.getElementById('clipper-url').value.trim();
             const videoId = getYouTubeId(urlInput);
             if (!videoId) {
@@ -1981,22 +1943,19 @@
             
             const btn = document.getElementById('download-full-video-btn');
             const originalText = btn.innerHTML;
-            btn.innerHTML = "<span>⏳</span> Generating Link...";
+            btn.innerHTML = "<span>⏳</span> Opening MP4 Downloader...";
             btn.disabled = true;
             
-            showToast("Generating direct full video download link...");
+            showToast("Opening high-speed MP4 downloader in new tab...");
             
-            try {
-                const downloadUrl = await getRealYouTubeDownloadUrl(urlInput);
-                window.open(downloadUrl, "_blank");
-                showToast("Download opened successfully!");
-            } catch (err) {
-                console.error(err);
-                window.open(`https://en.savefrom.net/#url=${urlInput}`, "_blank");
-            } finally {
+            // Redirects to pre-loaded y2mate converter to download the real MP4 file directly
+            const downloadUrl = `https://www.youtubepp.com/watch?v=${videoId}`;
+            window.open(downloadUrl, "_blank");
+            
+            setTimeout(() => {
                 btn.innerHTML = originalText;
                 btn.disabled = false;
-            }
+            }, 1200);
         }
 
         // Log out
