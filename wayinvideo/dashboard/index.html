@@ -454,6 +454,7 @@
             align-items: center;
             justify-content: center;
             overflow: hidden;
+            border-radius: 12px;
         }
 
         .clip-video-placeholder {
@@ -461,6 +462,17 @@
             height: 100%;
             object-fit: cover;
             opacity: 0.6;
+        }
+
+        .clip-preview iframe {
+            position: absolute;
+            width: 316% !important;
+            height: 100% !important;
+            top: 0;
+            left: -108% !important;
+            border: none;
+            pointer-events: none;
+            z-index: 1;
         }
 
         .clip-overlay-caption {
@@ -478,6 +490,7 @@
             padding: 6px;
             border-radius: 4px;
             animation: pulse 1.5s infinite;
+            z-index: 2;
         }
 
         @keyframes pulse {
@@ -704,13 +717,13 @@
                 <!-- Clipper output -->
                 <div class="clips-output" id="clipper-output">
                     <div class="clip-card">
-                        <div class="clip-preview">
-                            <img class="clip-video-placeholder" src="../../_next/static/media/bkg.9cd31471.webp" alt="video">
+                        <div class="clip-preview" id="clip-preview-container-1">
+                            <img class="clip-video-placeholder" id="clip-placeholder-1" src="../../_next/static/media/bkg.9cd31471.webp" alt="video">
                             <div class="clip-overlay-caption" id="caption-preview-1">"Why focus is the key"</div>
-                            <div class="play-btn" onclick="alert('Playing vertical clip 1 with styled subtitles...')">▶</div>
+                            <div class="play-btn" id="play-btn-1" onclick="playYouTubeClip(1)">▶</div>
                         </div>
                         <div class="clip-info">
-                            <div class="clip-title">Focus is your Superpower</div>
+                            <div class="clip-title" id="clip-title-1">Focus is your Superpower</div>
                             <div class="clip-meta">
                                 <span>Duration: 0:42</span>
                                 <span class="clip-score">Viral Score: 98%</span>
@@ -719,13 +732,13 @@
                     </div>
 
                     <div class="clip-card">
-                        <div class="clip-preview">
-                            <img class="clip-video-placeholder" src="../../_next/static/media/bkg.9cd31471.webp" alt="video">
+                        <div class="clip-preview" id="clip-preview-container-2">
+                            <img class="clip-video-placeholder" id="clip-placeholder-2" src="../../_next/static/media/bkg.9cd31471.webp" alt="video">
                             <div class="clip-overlay-caption" id="caption-preview-2">"The $10B Secret Strategy"</div>
-                            <div class="play-btn" onclick="alert('Playing vertical clip 2 with styled subtitles...')">▶</div>
+                            <div class="play-btn" id="play-btn-2" onclick="playYouTubeClip(2)">▶</div>
                         </div>
                         <div class="clip-info">
-                            <div class="clip-title">Unlocking Scale Optimization</div>
+                            <div class="clip-title" id="clip-title-2">Unlocking Scale Optimization</div>
                             <div class="clip-meta">
                                 <span>Duration: 0:58</span>
                                 <span class="clip-score">Viral Score: 94%</span>
@@ -734,13 +747,13 @@
                     </div>
 
                     <div class="clip-card">
-                        <div class="clip-preview">
-                            <img class="clip-video-placeholder" src="../../_next/static/media/bkg.9cd31471.webp" alt="video">
+                        <div class="clip-preview" id="clip-preview-container-3">
+                            <img class="clip-video-placeholder" id="clip-placeholder-3" src="../../_next/static/media/bkg.9cd31471.webp" alt="video">
                             <div class="clip-overlay-caption" id="caption-preview-3">"Don't do it alone"</div>
-                            <div class="play-btn" onclick="alert('Playing vertical clip 3 with styled subtitles...')">▶</div>
+                            <div class="play-btn" id="play-btn-3" onclick="playYouTubeClip(3)">▶</div>
                         </div>
                         <div class="clip-info">
-                            <div class="clip-title">The Power of Collaboration</div>
+                            <div class="clip-title" id="clip-title-3">The Power of Collaboration</div>
                             <div class="clip-meta">
                                 <span>Duration: 0:35</span>
                                 <span class="clip-score">Viral Score: 89%</span>
@@ -854,16 +867,47 @@
             document.getElementById('workspace-title').textContent = titles[tabId];
         }
 
+        let activeYouTubeId = "dQw4w9WgXcQ"; // Default fallback
+        let playingClipNum = null;
+
+        function getYouTubeId(url) {
+            const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+            const match = url.match(regExp);
+            return (match && match[2].length === 11) ? match[2] : null;
+        }
+
         // Clip Maker Run Simulation
         function runClipper() {
+            const urlInput = document.getElementById('clipper-url').value.trim();
+            const videoId = getYouTubeId(urlInput);
+            
+            if (!videoId) {
+                alert("Please enter a valid YouTube Video link.");
+                return;
+            }
+
+            activeYouTubeId = videoId;
+
             const statusDiv = document.getElementById('clipper-status');
             const outputDiv = document.getElementById('clipper-output');
             
             outputDiv.style.display = 'none';
             statusDiv.style.display = 'block';
 
+            // Reset any existing iframes
+            for (let i = 1; i <= 3; i++) {
+                const container = document.getElementById('clip-preview-container-' + i);
+                const oldIframe = container.querySelector('iframe');
+                if (oldIframe) oldIframe.remove();
+                
+                const placeholder = document.getElementById('clip-placeholder-' + i);
+                if (placeholder) placeholder.style.display = 'block';
+                
+                const playBtn = document.getElementById('play-btn-' + i);
+                if (playBtn) playBtn.style.display = 'flex';
+            }
+
             const percentageEl = document.getElementById('clipper-percentage');
-            
             const steps = [
                 document.getElementById('clip-step-1'),
                 document.getElementById('clip-step-2'),
@@ -871,13 +915,12 @@
                 document.getElementById('clip-step-4')
             ];
 
-            // Reset steps
+            // Reset steps styling
             steps.forEach(step => {
                 step.classList.remove('active', 'done');
             });
 
             let percent = 0;
-            let currentStep = 0;
             steps[0].classList.add('active');
 
             const interval = setInterval(() => {
@@ -900,14 +943,72 @@
                     setTimeout(() => {
                         statusDiv.style.display = 'none';
                         outputDiv.style.display = 'grid';
+
+                        // Set custom video thumbnail backgrounds dynamically from YouTube API
+                        for (let i = 1; i <= 3; i++) {
+                            const img = document.getElementById('clip-placeholder-' + i);
+                            if (img) {
+                                img.src = `https://img.youtube.com/vi/${activeYouTubeId}/hqdefault.jpg`;
+                            }
+                        }
+
+                        // Customize titles based on video ID
+                        document.getElementById('clip-title-1').textContent = "Isolated Moment Clip #1";
+                        document.getElementById('clip-title-2').textContent = "Key Discussion Segment #2";
+                        document.getElementById('clip-title-3').textContent = "Focal Summary Clip #3";
+
                         showToast('Vertical virals generated successfully!');
                     }, 500);
                 }
-            }, 150);
+            }, 100);
+        }
+
+        // Dynamically inject YouTube embed when user clicks play button on a vertical short
+        function playYouTubeClip(clipNum) {
+            const container = document.getElementById('clip-preview-container-' + clipNum);
+            const placeholder = document.getElementById('clip-placeholder-' + clipNum);
+            const playBtn = document.getElementById('play-btn-' + clipNum);
+
+            // Remove any other playing clip's iframe
+            if (playingClipNum && playingClipNum !== clipNum) {
+                const oldContainer = document.getElementById('clip-preview-container-' + playingClipNum);
+                const oldIframe = oldContainer.querySelector('iframe');
+                if (oldIframe) oldIframe.remove();
+                
+                const oldPlaceholder = document.getElementById('clip-placeholder-' + playingClipNum);
+                if (oldPlaceholder) oldPlaceholder.style.display = 'block';
+                
+                const oldPlayBtn = document.getElementById('play-btn-' + playingClipNum);
+                if (oldPlayBtn) oldPlayBtn.style.display = 'flex';
+            }
+
+            // Start times for mock segments (different segments of the YouTube video)
+            const startTimes = { 1: 15, 2: 75, 3: 135 };
+            const startTime = startTimes[clipNum] || 0;
+
+            // Create embedded video with autoplay parameters
+            const iframe = document.createElement('iframe');
+            iframe.src = `https://www.youtube.com/embed/${activeYouTubeId}?autoplay=1&mute=0&start=${startTime}&controls=0&modestbranding=1&rel=0`;
+            iframe.allow = "autoplay; encrypted-media";
+            
+            placeholder.style.display = 'none';
+            playBtn.style.display = 'none';
+            container.appendChild(iframe);
+            
+            playingClipNum = clipNum;
+            showToast(`Streaming clip #${clipNum} inside vertical frame...`);
         }
 
         // Summarizer Run Simulation
         function runSummarizer() {
+            const urlInput = document.getElementById('summarizer-url').value.trim();
+            const videoId = getYouTubeId(urlInput);
+            
+            if (!videoId) {
+                alert("Please enter a valid YouTube Video link.");
+                return;
+            }
+
             const status = document.getElementById('summarizer-status');
             const output = document.getElementById('summarizer-output');
 
@@ -918,7 +1019,7 @@
                 status.style.display = 'none';
                 output.style.display = 'block';
                 showToast('Video summarized successfully!');
-            }, 2500);
+            }, 1500);
         }
 
         // Captions Style selector

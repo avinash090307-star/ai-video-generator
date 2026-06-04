@@ -125,18 +125,7 @@
                     e.preventDefault();
                     
                     if (isLoggedIn) {
-                        if (text === 'login' || text === 'sign in' || text === 'log in') {
-                            window.location.href = 'wayinvideo/dashboard/index.html';
-                        } else {
-                            // Logout action
-                            if (confirm('Log out from ai.video.generater?')) {
-                                localStorage.removeItem('user_logged_in');
-                                localStorage.removeItem('user_name');
-                                localStorage.removeItem('user_email');
-                                localStorage.removeItem('user_tier');
-                                window.location.href = 'index.html';
-                            }
-                        }
+                        window.location.href = 'wayinvideo/dashboard/index.html';
                     } else {
                         // Redirect to local mock login page
                         if (text.includes('get started') || text.includes('free')) {
