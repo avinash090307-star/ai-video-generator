@@ -14,6 +14,8 @@
             --card-bg: rgba(20, 20, 20, 0.7);
             --primary: #1ed760;
             --primary-hover: #17af4e;
+            --accent: #8c52ff;
+            --accent-hover: #763bfa;
             --text-main: #ffffff;
             --text-secondary: rgba(255, 255, 255, 0.65);
             --border-color: rgba(255, 255, 255, 0.1);
@@ -37,6 +39,7 @@
             align-items: center;
             position: relative;
             overflow-x: hidden;
+            padding: 40px 20px;
         }
 
         /* Ambient glow background effects */
@@ -208,6 +211,7 @@
             gap: 12px;
             cursor: pointer;
             transition: all 0.3s ease;
+            margin-bottom: 10px;
         }
 
         .btn-google:hover {
@@ -282,13 +286,23 @@
             Continue with Google
         </button>
 
+        <div class="divider">
+            <span>Redeem Gift Code</span>
+        </div>
+        
+        <div class="form-group" style="text-align: center; margin-bottom: 0;">
+            <input type="text" id="gift-code" placeholder="ENTER PROMO CODE" style="text-align: center; text-transform: uppercase; font-weight: 600; letter-spacing: 0.05em; border-color: rgba(255, 255, 255, 0.15); margin-bottom: 10px;">
+            <button type="button" class="btn-submit" onclick="handleGiftCodeLogin()" style="background-color: var(--accent); color: #fff; box-shadow: 0 4px 12px rgba(140, 82, 255, 0.3);">Unlock Premium Free</button>
+            <div id="gift-error" style="color: #dc4446; font-size: 13px; margin-top: 8px; display: none; font-weight: 500;">Invalid gift code. Please try again.</div>
+        </div>
+
         <div class="auth-switch">
             <span id="switch-text">Don't have an account? </span>
             <a href="#" id="switch-btn" onclick="toggleAuth(event)">Sign Up</a>
         </div>
 
         <div class="mock-notice">
-            🔒 <strong>Offline Mode Active:</strong> You can sign in with Email or Google to bypass network restrictions.
+            🔒 <strong>Promo Active:</strong> Enter code <code>ABHI@090307</code> to unlock premium free subscription.
         </div>
     </div>
 
@@ -349,6 +363,21 @@
 
             // Redirect back to homepage with logged_in=true
             window.location.href = '../../index.html?logged_in=true';
+        }
+
+        function handleGiftCodeLogin() {
+            const code = document.getElementById('gift-code').value.trim();
+            const error = document.getElementById('gift-error');
+            if (code === 'ABHI@090307') {
+                localStorage.setItem('user_logged_in', 'true');
+                localStorage.setItem('user_email', 'abhi@generater.ai');
+                localStorage.setItem('user_name', 'Abhi');
+                localStorage.setItem('user_tier', 'Pro');
+                
+                window.location.href = '../../index.html?logged_in=true';
+            } else {
+                error.style.display = 'block';
+            }
         }
 
         // Initialize UI

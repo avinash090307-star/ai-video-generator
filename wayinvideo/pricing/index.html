@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pricing Plans - ai.video.generater</title>
+    <!-- Modern font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0d0e0c;
+            --card-bg: rgba(20, 20, 20, 0.7);
+            --primary: #1ed760;
+            --primary-hover: #17af4e;
+            --accent: #8c52ff;
+            --text-main: #ffffff;
+            --text-secondary: rgba(255, 255, 255, 0.65);
+            --border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 60px 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Ambient glow background effects */
+        .ambient-glow-1 {
+            position: absolute;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(30, 215, 96, 0.1) 0%, rgba(30, 215, 96, 0) 70%);
+            top: -150px;
+            left: -150px;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .ambient-glow-2 {
+            position: absolute;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(140, 82, 255, 0.08) 0%, rgba(140, 82, 255, 0) 70%);
+            bottom: -200px;
+            right: -200px;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 50px;
+            z-index: 2;
+        }
+
+        header h1 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 40px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            letter-spacing: -0.03em;
+        }
+
+        header p {
+            color: var(--text-secondary);
+            font-size: 17px;
+        }
+
+        .pricing-container {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            flex-wrap: wrap;
+            max-width: 1000px;
+            width: 100%;
+            margin-bottom: 50px;
+            z-index: 2;
+        }
+
+        .price-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 40px;
+            width: 320px;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            display: flex;
+            flex-direction: column;
+            transition: all 0.3s ease;
+        }
+
+        .price-card.featured {
+            border-color: var(--primary);
+            box-shadow: 0 10px 30px rgba(30, 215, 96, 0.1);
+            position: relative;
+        }
+
+        .badge {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(30, 215, 96, 0.15);
+            color: var(--primary);
+            font-size: 12px;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 9999px;
+            text-transform: uppercase;
+        }
+
+        .price-card h3 {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+
+        .price {
+            font-size: 44px;
+            font-weight: 800;
+            margin-bottom: 25px;
+            font-family: 'Space Grotesk', sans-serif;
+        }
+
+        .price span {
+            font-size: 16px;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        .features-list {
+            list-style: none;
+            margin-bottom: 35px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            text-align: left;
+        }
+
+        .features-list li {
+            font-size: 14px;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .features-list li::before {
+            content: '✓';
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        .btn-subscribe {
+            width: 100%;
+            padding: 14px;
+            background-color: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            color: var(--text-main);
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            text-decoration: none;
+            margin-top: auto;
+        }
+
+        .price-card.featured .btn-subscribe {
+            background-color: var(--primary);
+            color: #000;
+            border: none;
+            box-shadow: 0 4px 12px rgba(30, 215, 96, 0.3);
+        }
+
+        .price-card.featured .btn-subscribe:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-2px);
+        }
+
+        /* Promo Gift Code Activation Area */
+        .gift-container {
+            width: 100%;
+            max-width: 670px;
+            background: var(--card-bg);
+            border: 1px dashed var(--border-color);
+            border-radius: 20px;
+            padding: 30px 40px;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            z-index: 2;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .gift-container.success {
+            border-color: var(--primary);
+            background: rgba(30, 215, 96, 0.04);
+        }
+
+        .gift-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .gift-desc {
+            color: var(--text-secondary);
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+
+        .gift-input-group {
+            display: flex;
+            gap: 12px;
+            max-width: 450px;
+            margin: 0 auto;
+        }
+
+        .gift-input {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 12px 16px;
+            color: #fff;
+            font-size: 15px;
+            outline: none;
+            text-align: center;
+            text-transform: uppercase;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            transition: all 0.3s ease;
+        }
+
+        .gift-input:focus {
+            border-color: var(--primary);
+        }
+
+        .btn-apply {
+            background-color: var(--primary);
+            color: #000;
+            border: none;
+            padding: 0 24px;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-apply:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .error-message {
+            color: #dc4446;
+            font-size: 13px;
+            margin-top: 10px;
+            display: none;
+            font-weight: 500;
+        }
+
+        .success-message {
+            color: var(--primary);
+            font-size: 14px;
+            margin-top: 10px;
+            display: none;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="ambient-glow-1"></div>
+    <div class="ambient-glow-2"></div>
+
+    <header>
+        <h1>Subscription Plans</h1>
+        <p>Choose a plan to power your content engine</p>
+    </header>
+
+    <div class="pricing-container">
+        <!-- Free Plan -->
+        <div class="price-card">
+            <h3>Starter</h3>
+            <div class="price">$0<span>/month</span></div>
+            <ul class="features-list">
+                <li>3 Video exports per month</li>
+                <li>Watermarked clips</li>
+                <li>Standard subtitles</li>
+                <li>SD processing quality</li>
+            </ul>
+            <button class="btn-subscribe" onclick="window.location.href='../dashboard/index.html'">Get Starter Mode</button>
+        </div>
+
+        <!-- Pro Plan -->
+        <div class="price-card featured">
+            <div class="badge">Most Popular</div>
+            <h3>Pro Studio</h3>
+            <div class="price" id="pro-price-tag">$29<span>/month</span></div>
+            <ul class="features-list">
+                <li>Unlimited viral clips</li>
+                <li>No watermark exports</li>
+                <li>Trending Subtitle Styles</li>
+                <li>4K processing quality</li>
+                <li>Developer API Keys</li>
+            </ul>
+            <button class="btn-subscribe" id="pro-subscribe-btn" onclick="subscribePro()">Subscribe Pro</button>
+        </div>
+    </div>
+
+    <!-- Redeem Gift Code Panel -->
+    <div class="gift-container" id="gift-card">
+        <div class="gift-title">🎁 Redeem Gift Card / Promo Code</div>
+        <p class="gift-desc" id="gift-prompt-text">Have a premium license key or gift code? Enter it below to unlock Pro Free.</p>
+        
+        <div class="gift-input-group">
+            <input type="text" class="gift-input" id="gift-code-input" placeholder="ENTER CODE" value="">
+            <button class="btn-apply" id="apply-code-btn" onclick="applyGiftCode()">Apply Code</button>
+        </div>
+        <div class="error-message" id="error-msg">Invalid gift code. Please check spelling and try again.</div>
+        <div class="success-message" id="success-msg">🎉 Gift Code Applied! 100% discount. Pro Studio subscription unlocked!</div>
+    </div>
+
+    <script>
+        let isPromoApplied = false;
+
+        function applyGiftCode() {
+            const input = document.getElementById('gift-code-input');
+            const code = input.value.trim();
+            const errorMsg = document.getElementById('error-msg');
+            const successMsg = document.getElementById('success-msg');
+            const giftCard = document.getElementById('gift-card');
+            const proPriceTag = document.getElementById('pro-price-tag');
+            const proBtn = document.getElementById('pro-subscribe-btn');
+            const giftPromptText = document.getElementById('gift-prompt-text');
+
+            if (code === 'ABHI@090307') {
+                isPromoApplied = true;
+                errorMsg.style.display = 'none';
+                successMsg.style.display = 'block';
+                giftCard.classList.add('success');
+                giftPromptText.textContent = "Gift code active: ABHI@090307 (100% off)";
+                
+                // Show Pro price is free
+                proPriceTag.innerHTML = "$0<span>/lifetime (Gift)</span>";
+                proBtn.textContent = "Activate Pro License";
+                proBtn.style.background = "linear-gradient(90deg, #1ed760, #8c52ff)";
+                proBtn.style.color = "#000";
+                
+                // Block inputs
+                input.disabled = true;
+                document.getElementById('apply-code-btn').disabled = true;
+            } else {
+                successMsg.style.display = 'none';
+                errorMsg.style.display = 'block';
+                giftCard.classList.remove('success');
+            }
+        }
+
+        function subscribePro() {
+            if (isPromoApplied) {
+                // Unlock Pro Free
+                localStorage.setItem('user_logged_in', 'true');
+                localStorage.setItem('user_name', 'Abhi');
+                localStorage.setItem('user_email', 'abhi@generater.ai');
+                localStorage.setItem('user_tier', 'Pro');
+                
+                window.location.href = '../dashboard/index.html';
+            } else {
+                // Simulate payment gating
+                const hasGiftCode = confirm("Pro Studio requires a premium subscription.\n\nDo you have a Gift Code? Click Cancel to enter it at the bottom.");
+                if (hasGiftCode) {
+                    document.getElementById('gift-code-input').focus();
+                }
+            }
+        }
+    </script>
+</body>
+</html>
