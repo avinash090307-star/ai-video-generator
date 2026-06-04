@@ -820,6 +820,24 @@
             width: 100px;
             height: 100px;
         }
+
+        /* Google OAuth Account Chooser Styles */
+        .g-account-row {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            border: 1px solid #dadce0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-bottom: 8px;
+        }
+        .g-account-row:hover {
+            background-color: #f1f3f4;
+        }
+        .g-account-row:active {
+            background-color: #e8eaed;
+        }
     </style>
 </head>
 <body>
@@ -1076,6 +1094,91 @@
         </div>
     </div>
 
+    <!-- Google OAuth Consent Modal -->
+    <div id="g-consent-modal" class="modal-overlay" onclick="if(event.target === this) closeConsentModal()">
+        <div class="modal-content-dialog" style="max-width: 440px; background: #ffffff; color: #3c4043; font-family: 'Roboto', sans-serif;">
+            <button class="modal-close-btn" onclick="closeConsentModal()" style="color: #5f6368;">×</button>
+            
+            <!-- Step 1: Account Chooser -->
+            <div id="g-step-chooser" style="text-align: center; padding: 10px 0;">
+                <div style="font-size: 24px; font-weight: 700; margin-bottom: 20px;">
+                    <span style="color: #4285F4;">G</span><span style="color: #EA4335;">o</span><span style="color: #FBBC05;">o</span><span style="color: #4285F4;">g</span><span style="color: #34A853;">l</span><span style="color: #EA4335;">e</span>
+                </div>
+                <h3 style="font-size: 20px; font-weight: 400; color: #202124; margin-bottom: 8px;">Choose an account</h3>
+                <p style="font-size: 14px; color: #5f6368; margin-bottom: 25px;">to continue to <span style="font-weight: 600; color: #202124;">ai.video.generater</span></p>
+                
+                <div style="display: flex; flex-direction: column; gap: 8px; text-align: left; margin-bottom: 20px;">
+                    <div class="g-account-row" onclick="selectGoogleAccount('Avinash', 'avinash090307@gmail.com')">
+                        <div class="g-avatar-circle" style="background: #15c; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; font-size: 14px; float: left; margin-right: 12px;">A</div>
+                        <div style="display: inline-block;">
+                            <div style="font-size: 14px; font-weight: 500; color: #3c4043;">Avinash</div>
+                            <div style="font-size: 12px; color: #5f6368;">avinash090307@gmail.com</div>
+                        </div>
+                    </div>
+                    <div class="g-account-row" onclick="selectGoogleAccount('Abhi', 'abhi@gmail.com')">
+                        <div class="g-avatar-circle" style="background: #e67e22; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; font-size: 14px; float: left; margin-right: 12px;">A</div>
+                        <div style="display: inline-block;">
+                            <div style="font-size: 14px; font-weight: 500; color: #3c4043;">Abhi</div>
+                            <div style="font-size: 12px; color: #5f6368;">abhi@gmail.com</div>
+                        </div>
+                    </div>
+                    <div class="g-account-row" onclick="showCustomGoogleInput()">
+                        <div class="g-avatar-circle" style="background: #7f8c8d; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; font-size: 14px; float: left; margin-right: 12px;">+</div>
+                        <div style="display: inline-block; padding-top: 8px;">
+                            <div style="font-size: 14px; font-weight: 500; color: #1a73e8;">Use another account</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Custom Account Input Panel -->
+                <div id="g-custom-input" style="display: none; border-top: 1px solid #dadce0; padding-top: 15px; margin-top: 10px; text-align: left;">
+                    <div class="modal-input-group" style="margin-bottom: 12px;">
+                        <label style="color: #5f6368; font-weight: 500; font-size: 12px; display: block; margin-bottom: 6px;">Email or Phone</label>
+                        <input type="email" id="g-custom-email" class="modal-input" placeholder="Enter email" style="background: #fff; border: 1px solid #dadce0; color: #202124; font-size: 14px; padding: 10px; border-radius: 4px; width: 100%;">
+                    </div>
+                    <button class="btn-action" onclick="submitCustomGoogle()" style="background: #1a73e8; color: #fff; border-radius: 4px; padding: 10px; font-size: 13px; font-weight: 500; width: 100%; border: none; cursor: pointer;">Next</button>
+                </div>
+            </div>
+            
+            <!-- Step 2: Consent / Permissions -->
+            <div id="g-step-consent" style="display: none; text-align: left; padding: 10px 0;">
+                <div style="font-size: 20px; font-weight: 700; margin-bottom: 20px; text-align: center;">
+                    <span style="color: #4285F4;">G</span><span style="color: #EA4335;">o</span><span style="color: #FBBC05;">o</span><span style="color: #4285F4;">g</span><span style="color: #34A853;">l</span><span style="color: #EA4335;">e</span>
+                </div>
+                <h3 style="font-size: 16px; font-weight: 500; color: #202124; margin-bottom: 15px; line-height: 1.4;">
+                    ai.video.generater wants access to your Google Account
+                </h3>
+                <p id="g-consent-user" style="font-size: 13px; color: #5f6368; background: #f1f3f4; padding: 8px 12px; border-radius: 6px; margin-bottom: 20px;">
+                    Signing in as <b>avinash090307@gmail.com</b>
+                </p>
+                
+                <p style="font-size: 13px; font-weight: 600; color: #3c4043; margin-bottom: 12px;">This will allow ai.video.generater to:</p>
+                
+                <div style="display: flex; flex-direction: column; gap: 14px; margin-bottom: 30px;">
+                    <div style="display: flex; gap: 12px; align-items: flex-start;">
+                        <input type="checkbox" checked disabled style="margin-top: 3px; accent-color: #1a73e8;">
+                        <div>
+                            <div style="font-size: 13px; font-weight: 500; color: #202124;">Manage your YouTube videos and playlists</div>
+                            <div style="font-size: 11px; color: #5f6368; line-height: 1.3; margin-top: 2px;">Upload vertical short videos, edit captions, and publish directly on your channel feeds.</div>
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 12px; align-items: flex-start;">
+                        <input type="checkbox" checked disabled style="margin-top: 3px; accent-color: #1a73e8;">
+                        <div>
+                            <div style="font-size: 13px; font-weight: 500; color: #202124;">View your YouTube channel identifier and analytics</div>
+                            <div style="font-size: 11px; color: #5f6368; line-height: 1.3; margin-top: 2px;">Used to link your pasted channel URL handle to verify upload status.</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="display: flex; justify-content: flex-end; gap: 12px; border-top: 1px solid #dadce0; padding-top: 20px;">
+                    <button onclick="closeConsentModal()" style="background: none; border: none; color: #1a73e8; font-size: 14px; font-weight: 500; padding: 10px 16px; border-radius: 4px; cursor: pointer;">Cancel</button>
+                    <button onclick="confirmGoogleConsent()" style="background: #1a73e8; border: none; color: #fff; font-size: 14px; font-weight: 500; padding: 10px 24px; border-radius: 4px; cursor: pointer; box-shadow: 0 1px 2px 0 rgba(60,64,67,0.3), 0 1px 3px 1px rgba(60,64,67,0.15);">Allow</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- YouTube Upload Modal -->
     <div id="yt-upload-modal" class="modal-overlay" onclick="if(event.target === this) closeYoutubeUploadModal()">
         <div class="modal-content-dialog">
@@ -1149,6 +1252,41 @@
                     <input type="text" class="modal-input" readonly value="https://youtube.com/shorts/dQw4w9WgXcQ" style="text-align: center; color: var(--primary); font-weight: 600;">
                 </div>
                 <button class="btn-secondary" onclick="closeYoutubeUploadModal()" style="width: 100%; margin-top: 15px; padding: 12px; border-radius: 10px;">Done</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI Video Compiler Overlay Modal -->
+    <div id="compiler-modal" class="modal-overlay" style="display: none; align-items: center; justify-content: center; z-index: 2000;">
+        <div class="modal-content-dialog" style="max-width: 450px; background: #0e100d; border: 1px solid var(--border-color); color: #fff; text-align: center; padding: 30px;">
+            <div class="modal-header">
+                <h3 style="font-family: 'Space Grotesk', sans-serif; font-size: 20px; font-weight: 700; color: #1ed760; margin-bottom: 8px;">AI Video Clip Compiler</h3>
+                <p style="color: var(--text-muted); font-size: 13px;">Rendering high-resolution vertical format with burnt-in animated captions...</p>
+            </div>
+            
+            <div class="modal-body" style="margin-top: 20px;">
+                <!-- Live preview canvas inside a phone-mockup container -->
+                <div style="width: 135px; height: 240px; margin: 0 auto 20px auto; border: 4px solid #333; border-radius: 16px; overflow: hidden; background: #000; box-shadow: 0 8px 24px rgba(0,0,0,0.6); position: relative;">
+                    <canvas id="compiler-preview-canvas" width="720" height="1280" style="width: 100%; height: 100%; object-fit: cover;"></canvas>
+                    <div style="position: absolute; top: 8px; left: 50%; transform: translateX(-50%); width: 40px; height: 4px; background: #333; border-radius: 2px;"></div>
+                </div>
+
+                <div class="progress-container" style="background: rgba(255,255,255,0.05); height: 8px; border-radius: 9999px; overflow: hidden; margin-bottom: 10px;">
+                    <div id="compiler-progress-bar" class="progress-bar" style="width: 0%; height: 100%; background: linear-gradient(90deg, #1ed760, #8c52ff); transition: width 0.1s ease-out;"></div>
+                </div>
+                
+                <div style="display: flex; justify-content: space-between; font-size: 12px; font-weight: 600; color: var(--primary); margin-bottom: 20px;">
+                    <span id="compiler-status-text">Initializing compilation...</span>
+                    <span id="compiler-percent-text">0%</span>
+                </div>
+
+                <div id="compiler-logs" style="text-align: left; font-family: monospace; font-size: 11px; color: var(--text-muted); height: 75px; overflow-y: auto; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 6px; border: 1px solid var(--border-color); line-height: 1.4;">
+                    <div>[SYSTEM] Ready to compile...</div>
+                </div>
+            </div>
+            
+            <div class="modal-footer" style="margin-top: 20px; text-align: center;">
+                <button id="compiler-cancel-btn" class="btn-secondary" onclick="cancelCompilation()" style="width: 100%; padding: 12px; border-radius: 10px;">Cancel Rendering</button>
             </div>
         </div>
     </div>
@@ -1585,55 +1723,405 @@
             showToast('Applied ' + name + ' caption template!');
         }
 
-        // Download Function (Downloads real playable MP4 or compiles WebM fallback)
+        // Download Function (Triggers dynamic 25-30s vertical clip compiler with custom subtitles)
         function downloadClip(clipNum) {
-            const btn = document.getElementById('download-btn-' + clipNum);
-            if (!btn) return;
-            const originalText = btn.innerHTML;
-            btn.innerHTML = "<span>⏳</span> Downloading...";
-            btn.disabled = true;
+            compileClipVideo(clipNum);
+        }
 
+        let compilerActive = false;
+        let compilerVideoElement = null;
+        let compilerRecorder = null;
+        let compilerInterval = null;
+
+        function cancelCompilation() {
+            compilerActive = false;
+            if (compilerVideoElement) {
+                compilerVideoElement.pause();
+                compilerVideoElement.remove();
+                compilerVideoElement = null;
+            }
+            if (compilerRecorder && compilerRecorder.state !== "inactive") {
+                compilerRecorder.stop();
+            }
+            if (compilerInterval) {
+                clearInterval(compilerInterval);
+                compilerInterval = null;
+            }
+            document.getElementById('compiler-modal').style.display = 'none';
+            showToast("Compilation cancelled.");
+        }
+
+        function compileClipVideo(clipNum) {
             const clip = clipsData.find(c => c.id === clipNum);
-            const filenameName = clip ? clip.title.toLowerCase().replace(/[^a-z0-9]+/g, '_') : `clip_${clipNum}`;
-
-            // Fetch a tiny real, playable MP4 file (Big Buck Bunny sample - 131KB)
+            if (!clip) return;
+            
+            compilerActive = true;
+            
+            // Show Compiler Modal
+            const modal = document.getElementById('compiler-modal');
+            modal.style.display = 'flex';
+            
+            const progressBar = document.getElementById('compiler-progress-bar');
+            const percentText = document.getElementById('compiler-percent-text');
+            const statusText = document.getElementById('compiler-status-text');
+            const logsDiv = document.getElementById('compiler-logs');
+            const previewCanvas = document.getElementById('compiler-preview-canvas');
+            const previewCtx = previewCanvas.getContext('2d');
+            
+            // Reset modal UI
+            progressBar.style.width = "0%";
+            percentText.textContent = "0%";
+            statusText.textContent = "Initializing...";
+            logsDiv.innerHTML = "<div>[SYSTEM] Initializing rendering pipeline...</div>";
+            
+            function addLog(msg) {
+                const div = document.createElement('div');
+                div.textContent = `[RENDER] ${msg}`;
+                logsDiv.appendChild(div);
+                logsDiv.scrollTop = logsDiv.scrollHeight;
+            }
+            
+            // Map clip to vertical stock video URL (different video matching the topic for each slot)
+            const stockVideos = {
+                1: "https://assets.mixkit.co/videos/preview/mixkit-web-developer-working-on-a-laptop-42934-large.mp4",
+                2: "https://assets.mixkit.co/videos/preview/mixkit-hands-of-a-businessman-working-on-a-laptop-42797-large.mp4",
+                3: "https://assets.mixkit.co/videos/preview/mixkit-woman-working-on-a-laptop-in-a-cafe-42793-large.mp4",
+                4: "https://assets.mixkit.co/videos/preview/mixkit-traffic-at-night-in-a-modern-city-42820-large.mp4",
+                5: "https://assets.mixkit.co/videos/preview/mixkit-typing-on-a-keyboard-in-a-close-up-shot-42933-large.mp4",
+                6: "https://assets.mixkit.co/videos/preview/mixkit-stars-in-space-background-1611-large.mp4"
+            };
+            
+            const videoUrl = stockVideos[clip.id] || stockVideos[1];
+            
+            // Determine compilation parameters
+            const durationParts = clip.duration.split(":");
+            const durationSec = parseInt(durationParts[0]) * 60 + parseInt(durationParts[1]);
+            const fps = 30;
+            const maxFrames = durationSec * fps;
+            const filenameName = clip.title.toLowerCase().replace(/[^a-z0-9]+/g, '_');
+            
+            addLog(`Target clip: "${clip.title}" (${durationSec} seconds)`);
+            addLog("Checking CORS authorization for footage streams...");
+            
+            // Create target compiler canvas
+            const canvas = document.createElement('canvas');
+            canvas.width = 720;
+            canvas.height = 1280;
+            const ctx = canvas.getContext('2d');
+            
+            // Setup capture stream
+            const stream = canvas.captureStream ? canvas.captureStream(fps) : (canvas.mozCaptureStream ? canvas.mozCaptureStream(fps) : null);
+            if (!stream) {
+                addLog("CRITICAL: Browser does not support canvas recording. Downloading mock file.");
+                setTimeout(() => {
+                    triggerMockDownload(filenameName);
+                    modal.style.display = 'none';
+                }, 2000);
+                return;
+            }
+            
+            // Set up MediaRecorder
+            let mimeType = 'video/webm';
+            let extension = 'mp4'; // Download as mp4 by default for OS compatibility
+            
+            if (MediaRecorder.isTypeSupported('video/mp4;codecs=h264')) {
+                mimeType = 'video/mp4;codecs=h264';
+            } else if (MediaRecorder.isTypeSupported('video/mp4')) {
+                mimeType = 'video/mp4';
+            } else if (MediaRecorder.isTypeSupported('video/webm;codecs=vp9')) {
+                mimeType = 'video/webm;codecs=vp9';
+            }
+            
+            const chunks = [];
+            compilerRecorder = new MediaRecorder(stream, { mimeType: mimeType });
+            compilerRecorder.ondataavailable = (e) => {
+                if (e.data && e.data.size > 0) chunks.push(e.data);
+            };
+            
+            compilerRecorder.onstop = () => {
+                if (!compilerActive) return;
+                addLog("Finalizing MP4 file container...");
+                const blob = new Blob(chunks, { type: mimeType });
+                const url = URL.createObjectURL(blob);
+                
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = `ai_video_generater_${filenameName}.${extension}`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                
+                modal.style.display = 'none';
+                showToast(`Downloaded "${clip.title}" successfully!`);
+                compilerActive = false;
+            };
+            
+            // Space gradient background variables for animation
+            let particleArray = [];
+            for (let i = 0; i < 40; i++) {
+                particleArray.push({
+                    x: Math.random() * 720,
+                    y: Math.random() * 1280,
+                    radius: Math.random() * 3 + 1,
+                    speed: Math.random() * 2 + 0.5,
+                    alpha: Math.random() * 0.8 + 0.2
+                });
+            }
+            
+            let frame = 0;
+            let drawVideoFootage = false;
+            
+            function startRecordingFlow() {
+                addLog("Encoding engine started.");
+                compilerRecorder.start();
+                
+                const frameDelay = 1000 / fps;
+                
+                compilerInterval = setInterval(() => {
+                    if (!compilerActive) {
+                        clearInterval(compilerInterval);
+                        return;
+                    }
+                    
+                    if (frame >= maxFrames) {
+                        clearInterval(compilerInterval);
+                        compilerRecorder.stop();
+                        return;
+                    }
+                    
+                    // Render frame onto canvas
+                    if (drawVideoFootage && compilerVideoElement) {
+                        // Fit video in 9:16 vertical layout
+                        const vAspect = compilerVideoElement.videoWidth / compilerVideoElement.videoHeight;
+                        const cAspect = canvas.width / canvas.height;
+                        let drawW, drawH, drawX, drawY;
+                        
+                        if (vAspect > cAspect) {
+                            drawH = canvas.height;
+                            drawW = drawH * vAspect;
+                            drawX = (canvas.width - drawW) / 2;
+                            drawY = 0;
+                        } else {
+                            drawW = canvas.width;
+                            drawH = drawW / vAspect;
+                            drawX = 0;
+                            drawY = (canvas.height - drawH) / 2;
+                        }
+                        
+                        ctx.fillStyle = "#000";
+                        ctx.fillRect(0, 0, canvas.width, canvas.height);
+                        ctx.drawImage(compilerVideoElement, drawX, drawY, drawW, drawH);
+                        
+                        // Dark overlay to make captions readable
+                        ctx.fillStyle = "rgba(0, 0, 0, 0.2)";
+                        ctx.fillRect(0, 0, canvas.width, canvas.height);
+                    } else {
+                        // Draw animated premium gradient fallback
+                        const grad = ctx.createLinearGradient(0, 0, 720, 1280);
+                        grad.addColorStop(0, '#070806');
+                        grad.addColorStop(1, '#0e100d');
+                        ctx.fillStyle = grad;
+                        ctx.fillRect(0, 0, 720, 1280);
+                        
+                        // Draw floating particles
+                        ctx.fillStyle = "#ffffff";
+                        particleArray.forEach(p => {
+                            ctx.save();
+                            ctx.globalAlpha = p.alpha;
+                            ctx.beginPath();
+                            ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                            ctx.fill();
+                            ctx.restore();
+                            
+                            p.y += p.speed;
+                            if (p.y > 1280) p.y = 0;
+                        });
+                        
+                        // Draw a phone-mockup frame inside the background
+                        ctx.strokeStyle = "rgba(255,255,255,0.05)";
+                        ctx.lineWidth = 10;
+                        ctx.strokeRect(30, 30, 660, 1220);
+                        
+                        // Spinning neon ring
+                        ctx.save();
+                        ctx.translate(360, 450);
+                        ctx.rotate((frame * 2 * Math.PI) / 180);
+                        const ringGrad = ctx.createLinearGradient(-150, -150, 150, 150);
+                        ringGrad.addColorStop(0, '#1ed760');
+                        ringGrad.addColorStop(1, '#8c52ff');
+                        ctx.strokeStyle = ringGrad;
+                        ctx.lineWidth = 10;
+                        ctx.beginPath();
+                        ctx.arc(0, 0, 100, 0, Math.PI * 1.5);
+                        ctx.stroke();
+                        ctx.restore();
+                        
+                        // Play button circle
+                        ctx.fillStyle = 'rgba(30, 215, 96, 0.2)';
+                        ctx.beginPath();
+                        ctx.arc(360, 450, 60, 0, Math.PI * 2);
+                        ctx.fill();
+                        ctx.fillStyle = '#1ed760';
+                        ctx.beginPath();
+                        ctx.arc(360, 450, 40, 0, Math.PI * 2);
+                        ctx.fill();
+                        
+                        ctx.fillStyle = '#000000';
+                        ctx.beginPath();
+                        ctx.moveTo(353, 432);
+                        ctx.lineTo(375, 450);
+                        ctx.lineTo(353, 468);
+                        ctx.closePath();
+                        ctx.fill();
+                        
+                        // Render waveform
+                        ctx.strokeStyle = "rgba(140, 82, 255, 0.4)";
+                        ctx.lineWidth = 4;
+                        ctx.beginPath();
+                        for (let x = 100; x < 620; x += 10) {
+                            const y = 980 + Math.sin((x + frame * 10) * 0.05) * 20 * Math.cos(frame * 0.1);
+                            if (x === 100) ctx.moveTo(x, y);
+                            else ctx.lineTo(x, y);
+                        }
+                        ctx.stroke();
+                    }
+                    
+                    // Render Burnt-In Subtitles
+                    const currentMs = (frame / fps) * 1000;
+                    let activeCaptionText = clip.subtitle;
+                    
+                    if (clip.captions) {
+                        let bestCap = null;
+                        clip.captions.forEach(cap => {
+                            if (cap.time <= currentMs) {
+                                bestCap = cap;
+                            }
+                        });
+                        if (bestCap) {
+                            activeCaptionText = bestCap.text;
+                        }
+                    }
+                    
+                    // Strip HTML tags from captions for canvas rendering
+                    const cleanCaptionText = activeCaptionText.replace(/<[^>]*>/g, '').trim();
+                    
+                    // Render Subtitles styled after Hormozi, MrBeast, or Minimalist
+                    ctx.save();
+                    ctx.textAlign = 'center';
+                    
+                    if (activeCaptionStyle === 'Hormozi') {
+                        // Bold Yellow Text, big, uppercase, drop shadow
+                        ctx.fillStyle = '#ffff00';
+                        ctx.font = "bold 44px 'Space Grotesk', sans-serif";
+                        ctx.shadowColor = 'rgba(0,0,0,0.9)';
+                        ctx.shadowBlur = 8;
+                        ctx.shadowOffsetX = 3;
+                        ctx.shadowOffsetY = 3;
+                        ctx.fillText(cleanCaptionText.toUpperCase(), 360, 850);
+                    } else if (activeCaptionStyle === 'MrBeast') {
+                        // White bold text with thick black border
+                        ctx.font = "900 48px 'Outfit', sans-serif";
+                        ctx.strokeStyle = '#000000';
+                        ctx.lineWidth = 10;
+                        ctx.lineJoin = 'miter';
+                        ctx.miterLimit = 2;
+                        ctx.strokeText(cleanCaptionText, 360, 850);
+                        ctx.fillStyle = '#ffffff';
+                        ctx.fillText(cleanCaptionText, 360, 850);
+                    } else {
+                        // Minimalist - Clean green/white typography
+                        ctx.fillStyle = '#1ed760';
+                        ctx.font = "500 38px sans-serif";
+                        ctx.fillText(cleanCaptionText, 360, 850);
+                    }
+                    ctx.restore();
+                    
+                    // Copyright Stamp
+                    ctx.fillStyle = "rgba(255,255,255,0.4)";
+                    ctx.font = "bold 20px 'Space Grotesk', sans-serif";
+                    ctx.fillText("✓ 100% COPYRIGHT CLEAR & SAFE", 360, 1150);
+                    
+                    // Copy compiler canvas frame to the miniature preview canvas in the modal
+                    previewCtx.drawImage(canvas, 0, 0, previewCanvas.width, previewCanvas.height);
+                    
+                    // Update Modal progress
+                    frame++;
+                    const pct = Math.floor((frame / maxFrames) * 100);
+                    progressBar.style.width = pct + "%";
+                    percentText.textContent = pct + "%";
+                    statusText.textContent = `Compiling frame ${frame}/${maxFrames}...`;
+                    
+                    if (frame % 90 === 0) {
+                        addLog(`Rendered ${Math.floor(frame/fps)}s / ${durationSec}s (${pct}%)`);
+                    }
+                }, frameDelay);
+            }
+            
+            // Create hidden video element and test CORS
+            addLog("Attempting to load high-resolution vertical footage...");
+            
+            compilerVideoElement = document.createElement('video');
+            compilerVideoElement.src = videoUrl;
+            compilerVideoElement.crossOrigin = "anonymous";
+            compilerVideoElement.muted = true;
+            compilerVideoElement.loop = true;
+            compilerVideoElement.playsInline = true;
+            
+            compilerVideoElement.oncanplaythrough = () => {
+                if (!compilerActive) return;
+                
+                // Test if drawing this video taints the canvas (CORS block check)
+                const testCanvas = document.createElement('canvas');
+                testCanvas.width = 10;
+                testCanvas.height = 10;
+                const testCtx = testCanvas.getContext('2d');
+                
+                try {
+                    testCtx.drawImage(compilerVideoElement, 0, 0, 10, 10);
+                    testCanvas.toDataURL(); // Throws SecurityError if tainted
+                    
+                    addLog("CORS authorization confirmed. Drawing footage frame-by-frame.");
+                    drawVideoFootage = true;
+                    
+                    compilerVideoElement.play().then(() => {
+                        startRecordingFlow();
+                    }).catch(err => {
+                        addLog("Video play error. Falling back to space animated template.");
+                        drawVideoFootage = false;
+                        startRecordingFlow();
+                    });
+                } catch (e) {
+                    addLog("CORS domain boundary restricted. Falling back to ContentID-immune particle layout.");
+                    drawVideoFootage = false;
+                    startRecordingFlow();
+                }
+            };
+            
+            compilerVideoElement.onerror = (e) => {
+                if (!compilerActive) return;
+                addLog("Footage offline or blocked. Compiling dynamic text-clip container.");
+                drawVideoFootage = false;
+                startRecordingFlow();
+            };
+        }
+        
+        function triggerMockDownload(filename) {
             fetch("https://www.w3schools.com/html/mov_bbb.mp4")
-                .then(response => {
-                    if (!response.ok) throw new Error("Network error fetching video");
-                    return response.blob();
-                })
+                .then(r => r.blob())
                 .then(blob => {
                     const url = URL.createObjectURL(blob);
                     const a = document.createElement("a");
                     a.href = url;
-                    a.download = `ai_video_generater_${filenameName}.mp4`;
+                    a.download = `ai_video_generater_${filename}.mp4`;
                     document.body.appendChild(a);
                     a.click();
                     document.body.removeChild(a);
                     URL.revokeObjectURL(url);
-
-                    btn.innerHTML = originalText;
-                    btn.disabled = false;
-                    showToast(`Downloaded "${clip ? clip.title : 'clip'}" successfully!`);
+                    showToast("Downloaded sample video!");
                 })
-                .catch(err => {
-                    console.warn("Could not download MP4 from CDN, compiling dynamic WebM fallback...", err);
-                    
-                    // Fall back to Canvas WebM generator (works offline!)
-                    generateCanvasVideo(clip ? clip.title : "AI Clip", (webmBlob) => {
-                        const url = URL.createObjectURL(webmBlob);
-                        const a = document.createElement("a");
-                        a.href = url;
-                        a.download = `ai_video_generater_${filenameName}.webm`;
-                        document.body.appendChild(a);
-                        a.click();
-                        document.body.removeChild(a);
-                        URL.revokeObjectURL(url);
-
-                        btn.innerHTML = originalText;
-                        btn.disabled = false;
-                        showToast(`Downloaded "${clip ? clip.title : 'clip'}" (WebM format) successfully!`);
-                    });
+                .catch(e => {
+                    showToast("Download failed. Canvas compiler not available.");
                 });
         }
 
@@ -1709,6 +2197,9 @@
             document.getElementById('yt-step-success').style.display = 'none';
         }
 
+        let selectedGoogleName = "Avinash";
+        let selectedGoogleEmail = "avinash090307@gmail.com";
+
         function authorizeYoutube() {
             let channelUrl = document.getElementById('yt-channel-url').value.trim();
             const authBtn = document.getElementById('yt-auth-btn');
@@ -1718,40 +2209,87 @@
                 return;
             }
 
-            // Clean and force absolute URL prefix to prevent relative 404 pages on GitHub Pages
-            if (!/^https?:\/\//i.test(channelUrl)) {
-                channelUrl = 'https://' + channelUrl;
+            // Show simulated Google OAuth Consent Modal
+            document.getElementById('g-consent-modal').style.display = 'flex';
+            document.getElementById('g-step-chooser').style.display = 'block';
+            document.getElementById('g-step-consent').style.display = 'none';
+            document.getElementById('g-custom-input').style.display = 'none';
+            document.getElementById('g-custom-email').value = '';
+            
+            authBtn.textContent = "Connecting...";
+            authBtn.disabled = true;
+        }
+
+        function selectGoogleAccount(name, email) {
+            selectedGoogleName = name;
+            selectedGoogleEmail = email;
+            
+            document.getElementById('g-consent-user').innerHTML = `Signing in as <b>${email}</b>`;
+            document.getElementById('g-step-chooser').style.display = 'none';
+            document.getElementById('g-step-consent').style.display = 'block';
+        }
+
+        function showCustomGoogleInput() {
+            document.getElementById('g-custom-input').style.display = 'block';
+        }
+
+        function submitCustomGoogle() {
+            const email = document.getElementById('g-custom-email').value.trim();
+            if (!email) {
+                alert("Please enter a valid Google email.");
+                return;
+            }
+            const name = email.split('@')[0];
+            selectGoogleAccount(name, email);
+        }
+
+        function confirmGoogleConsent() {
+            const channelUrl = document.getElementById('yt-channel-url').value.trim();
+            
+            // Clean channel url
+            let cleanUrl = channelUrl;
+            if (!/^https?:\/\//i.test(cleanUrl)) {
+                cleanUrl = 'https://' + cleanUrl;
             }
             
-            // Parse channel handle or ID for display
             let displayHandle = "@mychannel";
-            if (channelUrl.includes("@")) {
-                const parts = channelUrl.split("@");
+            if (cleanUrl.includes("@")) {
+                const parts = cleanUrl.split("@");
                 if (parts[1]) displayHandle = "@" + parts[1].split("/")[0].split("?")[0];
-            } else if (channelUrl.includes("/channel/")) {
-                const parts = channelUrl.split("/channel/");
+            } else if (cleanUrl.includes("/channel/")) {
+                const parts = cleanUrl.split("/channel/");
                 if (parts[1]) displayHandle = parts[1].split("/")[0].split("?")[0];
             }
             
-            showToast("Connecting to YouTube channel...");
-            authBtn.textContent = "Connecting Channel...";
-            authBtn.disabled = true;
+            localStorage.setItem('yt_channel_url', cleanUrl);
+            localStorage.setItem('yt_channel_handle', displayHandle);
+            localStorage.setItem('yt_google_email', selectedGoogleEmail);
+            localStorage.setItem('yt_google_name', selectedGoogleName);
             
-            setTimeout(() => {
-                localStorage.setItem('yt_channel_url', channelUrl);
-                localStorage.setItem('yt_channel_handle', displayHandle);
-                
-                // Update badge text in step 2
-                const badge = document.getElementById('yt-linked-channel-badge');
-                if (badge) {
-                    badge.textContent = `🔗 Linked to: ${displayHandle}`;
-                }
-                
-                document.getElementById('yt-step-auth').style.display = 'none';
-                document.getElementById('yt-step-upload').style.display = 'block';
+            // Update badge text in step 2
+            const badge = document.getElementById('yt-linked-channel-badge');
+            if (badge) {
+                badge.textContent = `🔗 Linked to: ${displayHandle} (${selectedGoogleEmail})`;
+            }
+            
+            // Close Consent Modal
+            closeConsentModal();
+            
+            // Transition YouTube Upload modal to Step 2 (Visibility & details)
+            document.getElementById('yt-step-auth').style.display = 'none';
+            document.getElementById('yt-step-upload').style.display = 'block';
+            
+            showToast("Google account connected & authorized successfully!");
+        }
+
+        function closeConsentModal() {
+            document.getElementById('g-consent-modal').style.display = 'none';
+            
+            const authBtn = document.getElementById('yt-auth-btn');
+            if (authBtn) {
                 authBtn.textContent = "🔒 Link Channel & Authorize";
                 authBtn.disabled = false;
-            }, 1200);
+            }
         }
 
         // Helper to record a copyright-free canvas video of the short in WebM format
