@@ -1,0 +1,979 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Video Generator - Premium Studio Dashboard</title>
+    <!-- Premium Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-main: #070806;
+            --bg-sidebar: #0e100d;
+            --bg-card: rgba(22, 26, 21, 0.6);
+            --primary: #1ed760;
+            --primary-glow: rgba(30, 215, 96, 0.15);
+            --accent-purple: #8c52ff;
+            --text-main: #ffffff;
+            --text-muted: rgba(255, 255, 255, 0.6);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --border-hover: rgba(30, 215, 96, 0.3);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            overflow: hidden;
+        }
+
+        /* Sidebar Styling */
+        .sidebar {
+            width: 280px;
+            background-color: var(--bg-sidebar);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            padding: 30px 20px;
+            height: 100vh;
+            z-index: 10;
+        }
+
+        .sidebar-logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 40px;
+            text-decoration: none;
+            color: var(--text-main);
+        }
+
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, var(--primary), var(--accent-purple));
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            color: #000;
+        }
+
+        .logo-text {
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 700;
+            font-size: 18px;
+            letter-spacing: -0.02em;
+            background: linear-gradient(to right, #ffffff, #888888);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .nav-menu {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .nav-item a {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 14px 16px;
+            color: var(--text-muted);
+            text-decoration: none;
+            border-radius: 12px;
+            font-weight: 500;
+            font-size: 15px;
+            transition: var(--transition);
+        }
+
+        .nav-item.active a, .nav-item a:hover {
+            color: var(--text-main);
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .nav-item.active a {
+            border-left: 3px solid var(--primary);
+            border-radius: 4px 12px 12px 4px;
+            background-color: rgba(30, 215, 96, 0.06);
+        }
+
+        .sidebar-footer {
+            margin-top: auto;
+            border-top: 1px solid var(--border-color);
+            padding-top: 20px;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .avatar {
+            width: 42px;
+            height: 42px;
+            background: linear-gradient(135deg, var(--accent-purple), var(--primary));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: #000;
+            font-size: 16px;
+        }
+
+        .user-info h4 {
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .user-info span {
+            font-size: 12px;
+            color: var(--primary);
+            font-weight: 600;
+            background: rgba(30, 215, 96, 0.1);
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        /* Main Workspace Content */
+        .workspace {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .header {
+            height: 80px;
+            border-bottom: 1px solid var(--border-color);
+            padding: 0 40px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background-color: rgba(7, 8, 6, 0.8);
+            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            z-index: 5;
+        }
+
+        .header-title h1 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 22px;
+            font-weight: 600;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .btn-premium {
+            background: linear-gradient(90deg, #1ed760, #8c52ff);
+            color: #000;
+            font-weight: 700;
+            padding: 10px 20px;
+            border-radius: 9999px;
+            text-decoration: none;
+            font-size: 14px;
+            transition: var(--transition);
+            box-shadow: 0 4px 15px rgba(30, 215, 96, 0.2);
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-premium:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(140, 82, 255, 0.3);
+        }
+
+        .btn-secondary {
+            background-color: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 10px 20px;
+            border-radius: 9999px;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .btn-secondary:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .main-content {
+            padding: 40px;
+            max-width: 1200px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        .tab-panel {
+            display: none;
+        }
+
+        .tab-panel.active {
+            display: block;
+        }
+
+        /* Overview Tab Layout */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 24px;
+            margin-bottom: 40px;
+        }
+
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 30px;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card:hover {
+            border-color: var(--border-hover);
+            transform: translateY(-4px);
+            box-shadow: 0 10px 30px rgba(30, 215, 96, 0.05);
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: var(--primary);
+            opacity: 0;
+            transition: var(--transition);
+        }
+
+        .card:hover::before {
+            opacity: 1;
+        }
+
+        .card-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            background: rgba(30, 215, 96, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: var(--primary);
+            margin-bottom: 20px;
+        }
+
+        .card-purple .card-icon {
+            background: rgba(140, 82, 255, 0.1);
+            color: var(--accent-purple);
+        }
+        .card-purple::before {
+            background: var(--accent-purple);
+        }
+
+        .card h3 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .card p {
+            color: var(--text-muted);
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        /* Tool Input Elements */
+        .input-group {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 30px;
+        }
+
+        .input-field {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 16px 20px;
+            color: #fff;
+            outline: none;
+            font-size: 15px;
+            transition: var(--transition);
+        }
+
+        .input-field:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 10px rgba(30, 215, 96, 0.15);
+        }
+
+        .btn-action {
+            background-color: var(--primary);
+            color: #000;
+            border: none;
+            padding: 0 30px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 15px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .btn-action:hover {
+            background-color: #17af4e;
+            transform: translateY(-2px);
+        }
+
+        /* Generation Status Animation */
+        .status-container {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px dashed var(--border-color);
+            border-radius: 16px;
+            padding: 30px;
+            margin-top: 30px;
+            display: none;
+        }
+
+        .status-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .status-title {
+            font-weight: 600;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .spinner {
+            width: 18px;
+            height: 18px;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .status-steps {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .step-item {
+            font-size: 14px;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            opacity: 0.5;
+            transition: var(--transition);
+        }
+
+        .step-item.active {
+            opacity: 1;
+            color: #fff;
+            font-weight: 500;
+        }
+
+        .step-item.done {
+            opacity: 1;
+            color: var(--primary);
+        }
+
+        .step-item.done::before {
+            content: '✓';
+            font-weight: 700;
+        }
+
+        /* Mock Video Clipper Output Layout */
+        .clips-output {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 24px;
+            margin-top: 40px;
+            display: none;
+        }
+
+        .clip-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            overflow: hidden;
+            transition: var(--transition);
+        }
+
+        .clip-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--primary);
+        }
+
+        .clip-preview {
+            aspect-ratio: 9/16;
+            background: #111;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .clip-video-placeholder {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0.6;
+        }
+
+        .clip-overlay-caption {
+            position: absolute;
+            bottom: 40px;
+            left: 10px;
+            right: 10px;
+            text-align: center;
+            font-size: 16px;
+            font-weight: 800;
+            color: #ffff00;
+            text-transform: uppercase;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+            background: rgba(0,0,0,0.4);
+            padding: 6px;
+            border-radius: 4px;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .play-btn {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            background: var(--primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #000;
+            font-size: 20px;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            transition: var(--transition);
+        }
+
+        .play-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .clip-info {
+            padding: 16px;
+        }
+
+        .clip-title {
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 8px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .clip-meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .clip-score {
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        /* Video Summarizer Output */
+        .summary-output {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 30px;
+            margin-top: 40px;
+            display: none;
+        }
+
+        .summary-header {
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 15px;
+        }
+
+        .summary-bullets {
+            margin-left: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            line-height: 1.6;
+        }
+
+        /* API Developer Keys tab */
+        .api-key-container {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+
+        .api-key-text {
+            font-family: monospace;
+            font-size: 16px;
+            color: var(--primary);
+        }
+
+        /* Success Notifications */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: #1ed760;
+            color: #000;
+            padding: 15px 25px;
+            border-radius: 10px;
+            font-weight: 700;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+            z-index: 100;
+            transform: translateY(150px);
+            transition: var(--transition);
+        }
+
+        .toast.show {
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Sidebar Menu -->
+    <div class="sidebar">
+        <a href="../../index.html" class="sidebar-logo">
+            <div class="logo-icon">▲</div>
+            <div class="logo-text">ai.video.generater</div>
+        </a>
+
+        <ul class="nav-menu">
+            <li class="nav-item active" onclick="switchTab('overview', this)">
+                <a href="#">🏠 Overview</a>
+            </li>
+            <li class="nav-item" onclick="switchTab('clipper', this)">
+                <a href="#">✂️ Long-to-Short Clipper</a>
+            </li>
+            <li class="nav-item" onclick="switchTab('summarizer', this)">
+                <a href="#">📝 Video Summarizer</a>
+            </li>
+            <li class="nav-item" onclick="switchTab('captions', this)">
+                <a href="#">💬 Animated Captions</a>
+            </li>
+            <li class="nav-item" onclick="switchTab('api', this)">
+                <a href="#">🔑 API Access</a>
+            </li>
+        </ul>
+
+        <div class="sidebar-footer">
+            <div class="user-profile">
+                <div class="avatar" id="user-avatar">U</div>
+                <div class="user-info">
+                    <h4 id="user-name-display">Premium User</h4>
+                    <span>Pro Account</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content Workspace -->
+    <div class="workspace">
+        <div class="header">
+            <div class="header-title">
+                <h1 id="workspace-title">Premium Suite Dashboard</h1>
+            </div>
+            <div class="header-actions">
+                <button class="btn-secondary" onclick="logOut()">Log Out</button>
+                <button class="btn-premium" onclick="showToast('Lifetime Premium Active!')">⭐ Premium Pro License</button>
+            </div>
+        </div>
+
+        <div class="main-content">
+            
+            <!-- OVERVIEW TAB -->
+            <div id="tab-overview" class="tab-panel active">
+                <h2 style="font-family: 'Space Grotesk', sans-serif; font-size: 32px; margin-bottom: 10px;">Welcome to ai.video.generater</h2>
+                <p style="color: var(--text-muted); margin-bottom: 40px; font-size: 16px;">Access your premium video generation suite. Mock processes are active for full offline availability.</p>
+
+                <div class="dashboard-grid">
+                    <div class="card" onclick="switchTab('clipper', document.querySelectorAll('.nav-item')[1])" style="cursor: pointer;">
+                        <div class="card-icon">✂️</div>
+                        <h3>AI Long-to-Short Clipper</h3>
+                        <p>Automatically isolate viral clips, add subtitles, and reframe videos to 9:16 vertical layouts.</p>
+                        <button class="btn-secondary" style="width: 100%;">Open Clipper</button>
+                    </div>
+
+                    <div class="card card-purple" onclick="switchTab('summarizer', document.querySelectorAll('.nav-item')[2])" style="cursor: pointer;">
+                        <div class="card-icon">📝</div>
+                        <h3>Video Summarizer</h3>
+                        <p>Generate highly accurate mindmaps, bullet takeaways, and structured outlines from any long video.</p>
+                        <button class="btn-secondary" style="width: 100%;">Open Summarizer</button>
+                    </div>
+
+                    <div class="card" onclick="switchTab('captions', document.querySelectorAll('.nav-item')[3])" style="cursor: pointer;">
+                        <div class="card-icon">💬</div>
+                        <h3>Animated Subtitles</h3>
+                        <p>Style subtitles using popular template styles like Hormozi, Beast, and clean minimalism.</p>
+                        <button class="btn-secondary" style="width: 100%;">Open Style Editor</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CLIPPER TAB -->
+            <div id="tab-clipper" class="tab-panel">
+                <h2 style="font-family: 'Space Grotesk', sans-serif; font-size: 28px; margin-bottom: 8px;">Long-to-Short AI Clipper</h2>
+                <p style="color: var(--text-muted); margin-bottom: 30px;">Input any long video link to automatically crop and format into vertical virals.</p>
+
+                <div class="input-group">
+                    <input type="text" class="input-field" id="clipper-url" placeholder="Paste YouTube link here... (e.g. https://www.youtube.com/watch?v=dQw4w9WgXcQ)" value="https://www.youtube.com/watch?v=dQw4w9WgXcQ">
+                    <button class="btn-action" onclick="runClipper()">Generate Clips</button>
+                </div>
+
+                <!-- Progress Bar -->
+                <div class="status-container" id="clipper-status">
+                    <div class="status-header">
+                        <div class="status-title">
+                            <div class="spinner"></div>
+                            <span>Analyzing Video Streams...</span>
+                        </div>
+                        <span id="clipper-percentage" style="color: var(--primary); font-weight: 700;">0%</span>
+                    </div>
+                    <ul class="status-steps">
+                        <li class="step-item" id="clip-step-1">Downloading video stream...</li>
+                        <li class="step-item" id="clip-step-2">Transcribing dialog using Whisper V3...</li>
+                        <li class="step-item" id="clip-step-3">Detecting semantic highlights & hook segments...</li>
+                        <li class="step-item" id="clip-step-4">Reframing visual focal points to 9:16 layout...</li>
+                    </ul>
+                </div>
+
+                <!-- Clipper output -->
+                <div class="clips-output" id="clipper-output">
+                    <div class="clip-card">
+                        <div class="clip-preview">
+                            <img class="clip-video-placeholder" src="../../_next/static/media/bkg.9cd31471.webp" alt="video">
+                            <div class="clip-overlay-caption" id="caption-preview-1">"Why focus is the key"</div>
+                            <div class="play-btn" onclick="alert('Playing vertical clip 1 with styled subtitles...')">▶</div>
+                        </div>
+                        <div class="clip-info">
+                            <div class="clip-title">Focus is your Superpower</div>
+                            <div class="clip-meta">
+                                <span>Duration: 0:42</span>
+                                <span class="clip-score">Viral Score: 98%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="clip-card">
+                        <div class="clip-preview">
+                            <img class="clip-video-placeholder" src="../../_next/static/media/bkg.9cd31471.webp" alt="video">
+                            <div class="clip-overlay-caption" id="caption-preview-2">"The $10B Secret Strategy"</div>
+                            <div class="play-btn" onclick="alert('Playing vertical clip 2 with styled subtitles...')">▶</div>
+                        </div>
+                        <div class="clip-info">
+                            <div class="clip-title">Unlocking Scale Optimization</div>
+                            <div class="clip-meta">
+                                <span>Duration: 0:58</span>
+                                <span class="clip-score">Viral Score: 94%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="clip-card">
+                        <div class="clip-preview">
+                            <img class="clip-video-placeholder" src="../../_next/static/media/bkg.9cd31471.webp" alt="video">
+                            <div class="clip-overlay-caption" id="caption-preview-3">"Don't do it alone"</div>
+                            <div class="play-btn" onclick="alert('Playing vertical clip 3 with styled subtitles...')">▶</div>
+                        </div>
+                        <div class="clip-info">
+                            <div class="clip-title">The Power of Collaboration</div>
+                            <div class="clip-meta">
+                                <span>Duration: 0:35</span>
+                                <span class="clip-score">Viral Score: 89%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SUMMARIZER TAB -->
+            <div id="tab-summarizer" class="tab-panel">
+                <h2 style="font-family: 'Space Grotesk', sans-serif; font-size: 28px; margin-bottom: 8px;">AI Video Summarizer</h2>
+                <p style="color: var(--text-muted); margin-bottom: 30px;">Input any video URL to generate structure outlines and summaries instantly.</p>
+
+                <div class="input-group">
+                    <input type="text" class="input-field" id="summarizer-url" placeholder="Paste YouTube link here..." value="https://www.youtube.com/watch?v=dQw4w9WgXcQ">
+                    <button class="btn-action" onclick="runSummarizer()">Summarize</button>
+                </div>
+
+                <div class="status-container" id="summarizer-status">
+                    <div class="status-header">
+                        <div class="status-title">
+                            <div class="spinner"></div>
+                            <span>Analyzing structure and context...</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="summary-output" id="summarizer-output">
+                    <div class="summary-header">
+                        <h3 style="font-size: 22px; font-weight: 600; margin-bottom: 5px;">Video Insights Summary</h3>
+                        <p style="font-size: 13px; color: var(--primary);">Generated by ai.video.generater Offline AI Engine</p>
+                    </div>
+                    <ul class="summary-bullets">
+                        <li><strong>Introduction:</strong> The speaker defines the core framework of modern startup execution and highlights the shift in market dynamics.</li>
+                        <li><strong>The Focus Principle:</strong> Why narrowing scope to a single product feature results in 10x faster iteration and loops.</li>
+                        <li><strong>Distribution Strategy:</strong> Establishing loops that rely on organic content distribution channels (like Verticals) instead of paid ad capture.</li>
+                        <li><strong>Key Conclusion:</strong> Building a highly optimized pipeline is secondary to validating immediate consumer demand.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- ANIMATED CAPTIONS TAB -->
+            <div id="tab-captions" class="tab-panel">
+                <h2 style="font-family: 'Space Grotesk', sans-serif; font-size: 28px; margin-bottom: 8px;">Animated Captions Style Studio</h2>
+                <p style="color: var(--text-muted); margin-bottom: 30px;">Choose a style template to apply trending captions to your vertical outputs.</p>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px;">
+                    <div class="card" onclick="setCaptionStyle('Hormozi', '#ffff00', 'uppercase')" style="cursor: pointer; text-align: center;">
+                        <h3 style="color: #ffff00; font-size: 20px; text-transform: uppercase; font-weight: 900;">HORMOZI STYLE</h3>
+                        <p style="margin-top: 10px; font-size: 13px;">Yellow/Green text, bold font, dynamic pulses.</p>
+                    </div>
+                    <div class="card card-purple" onclick="setCaptionStyle('MrBeast', '#ffffff', 'none')" style="cursor: pointer; text-align: center;">
+                        <h3 style="color: #ffffff; font-size: 20px; font-weight: 800; text-shadow: 0 2px 4px #000;">MrBeast Style</h3>
+                        <p style="margin-top: 10px; font-size: 13px;">White font, drop shadows, cartoon animations.</p>
+                    </div>
+                    <div class="card" onclick="setCaptionStyle('Minimalist', '#1ed760', 'none')" style="cursor: pointer; text-align: center;">
+                        <h3 style="color: #1ed760; font-size: 18px; font-weight: 500;">Minimalist</h3>
+                        <p style="margin-top: 10px; font-size: 13px;">Clean typography, flat layouts, subtle changes.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- API TAB -->
+            <div id="tab-api" class="tab-panel">
+                <h2 style="font-family: 'Space Grotesk', sans-serif; font-size: 28px; margin-bottom: 8px;">Developer API Keys</h2>
+                <p style="color: var(--text-muted); margin-bottom: 30px;">Integrate ai.video.generater engines directly into your applications.</p>
+
+                <div class="card">
+                    <h3>Your Developer API Key</h3>
+                    <p>Use this key in standard Authorization headers (`Authorization: Bearer <key>`). Keep it secret.</p>
+                    <div class="api-key-container">
+                        <span class="api-key-text" id="api-key-val">avg_live_72a8df8162f4bda7b2ec910fbc2</span>
+                        <button class="btn-secondary" onclick="regenerateApiKey()">Regenerate</button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="toast-notify" class="toast">Action completed successfully!</div>
+
+    <script>
+        // Check for user login details
+        document.addEventListener("DOMContentLoaded", function() {
+            const userName = localStorage.getItem('user_name') || 'Premium User';
+            document.getElementById('user-name-display').textContent = userName;
+            document.getElementById('user-avatar').textContent = userName.charAt(0).toUpperCase();
+        });
+
+        // Tab Switching Logic
+        function switchTab(tabId, el) {
+            // Update active menu item
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+            el.classList.add('active');
+
+            // Show appropriate panel
+            document.querySelectorAll('.tab-panel').forEach(panel => panel.classList.remove('active'));
+            document.getElementById('tab-' + tabId).classList.add('active');
+
+            // Update header title
+            const titles = {
+                'overview': 'Premium Suite Dashboard',
+                'clipper': 'AI Video Clipper Studio',
+                'summarizer': 'AI Video Summarizer Engine',
+                'captions': 'Caption Style Studio',
+                'api': 'Developer Access Portal'
+            };
+            document.getElementById('workspace-title').textContent = titles[tabId];
+        }
+
+        // Clip Maker Run Simulation
+        function runClipper() {
+            const statusDiv = document.getElementById('clipper-status');
+            const outputDiv = document.getElementById('clipper-output');
+            
+            outputDiv.style.display = 'none';
+            statusDiv.style.display = 'block';
+
+            const percentageEl = document.getElementById('clipper-percentage');
+            
+            const steps = [
+                document.getElementById('clip-step-1'),
+                document.getElementById('clip-step-2'),
+                document.getElementById('clip-step-3'),
+                document.getElementById('clip-step-4')
+            ];
+
+            // Reset steps
+            steps.forEach(step => {
+                step.classList.remove('active', 'done');
+            });
+
+            let percent = 0;
+            let currentStep = 0;
+            steps[0].classList.add('active');
+
+            const interval = setInterval(() => {
+                percent += 5;
+                percentageEl.textContent = percent + '%';
+
+                if (percent === 25) {
+                    steps[0].classList.replace('active', 'done');
+                    steps[1].classList.add('active');
+                } else if (percent === 50) {
+                    steps[1].classList.replace('active', 'done');
+                    steps[2].classList.add('active');
+                } else if (percent === 75) {
+                    steps[2].classList.replace('active', 'done');
+                    steps[3].classList.add('active');
+                } else if (percent >= 100) {
+                    clearInterval(interval);
+                    steps[3].classList.replace('active', 'done');
+                    
+                    setTimeout(() => {
+                        statusDiv.style.display = 'none';
+                        outputDiv.style.display = 'grid';
+                        showToast('Vertical virals generated successfully!');
+                    }, 500);
+                }
+            }, 150);
+        }
+
+        // Summarizer Run Simulation
+        function runSummarizer() {
+            const status = document.getElementById('summarizer-status');
+            const output = document.getElementById('summarizer-output');
+
+            output.style.display = 'none';
+            status.style.display = 'block';
+
+            setTimeout(() => {
+                status.style.display = 'none';
+                output.style.display = 'block';
+                showToast('Video summarized successfully!');
+            }, 2500);
+        }
+
+        // Captions Style selector
+        function setCaptionStyle(name, color, transform) {
+            const cap1 = document.getElementById('caption-preview-1');
+            const cap2 = document.getElementById('caption-preview-2');
+            const cap3 = document.getElementById('caption-preview-3');
+
+            [cap1, cap2, cap3].forEach(cap => {
+                if (cap) {
+                    cap.style.color = color;
+                    cap.style.textTransform = transform;
+                    if (name === 'Hormozi') {
+                        cap.style.fontWeight = '900';
+                        cap.style.fontFamily = "'Space Grotesk', sans-serif";
+                    } else if (name === 'MrBeast') {
+                        cap.style.fontWeight = '800';
+                        cap.style.fontFamily = "'Outfit', sans-serif";
+                    } else {
+                        cap.style.fontWeight = '400';
+                        cap.style.fontFamily = 'sans-serif';
+                    }
+                }
+            });
+            showToast('Applied ' + name + ' caption template!');
+        }
+
+        // Regenerate API keys
+        function regenerateApiKey() {
+            const chars = 'abcdef0123456789';
+            let key = 'avg_live_';
+            for (let i = 0; i < 24; i++) {
+                key += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            document.getElementById('api-key-val').textContent = key;
+            showToast('Regenerated Developer API Key!');
+        }
+
+        // Show toast notification
+        function showToast(message) {
+            const toast = document.getElementById('toast-notify');
+            toast.textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // Log out
+        function logOut() {
+            localStorage.removeItem('user_logged_in');
+            localStorage.removeItem('user_name');
+            localStorage.removeItem('user_email');
+            window.location.href = '../../index.html';
+        }
+    </script>
+</body>
+</html>

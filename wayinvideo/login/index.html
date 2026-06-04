@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign In - ai.video.generater</title>
+    <!-- Modern font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0d0e0c;
+            --card-bg: rgba(20, 20, 20, 0.7);
+            --primary: #1ed760;
+            --primary-hover: #17af4e;
+            --text-main: #ffffff;
+            --text-secondary: rgba(255, 255, 255, 0.65);
+            --border-color: rgba(255, 255, 255, 0.1);
+            --border-focus: #1ed760;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Ambient glow background effects */
+        .ambient-glow-1 {
+            position: absolute;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(30, 215, 96, 0.15) 0%, rgba(30, 215, 96, 0) 70%);
+            top: -100px;
+            left: -100px;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .ambient-glow-2 {
+            position: absolute;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(114, 46, 209, 0.1) 0%, rgba(114, 46, 209, 0) 70%);
+            bottom: -150px;
+            right: -150px;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .login-container {
+            width: 100%;
+            max-width: 450px;
+            padding: 40px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+            z-index: 2;
+            position: relative;
+            text-align: center;
+        }
+
+        .logo-wrapper {
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .logo-img {
+            height: 48px;
+            object-fit: contain;
+        }
+
+        h2 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            letter-spacing: -0.02em;
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 15px;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: var(--text-secondary);
+        }
+
+        input {
+            width: 100%;
+            padding: 14px 16px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            color: var(--text-main);
+            font-size: 15px;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        input:focus {
+            border-color: var(--border-focus);
+            box-shadow: 0 0 10px rgba(30, 215, 96, 0.2);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .forgot-pass {
+            display: block;
+            text-align: right;
+            font-size: 13px;
+            color: var(--primary);
+            text-decoration: none;
+            margin-top: -12px;
+            margin-bottom: 24px;
+            transition: color 0.2s;
+        }
+
+        .forgot-pass:hover {
+            color: var(--primary-hover);
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 15px;
+            background-color: var(--primary);
+            color: #000000;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(30, 215, 96, 0.3);
+            margin-bottom: 10px;
+        }
+
+        .btn-submit:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(30, 215, 96, 0.4);
+        }
+
+        /* Divider */
+        .divider {
+            display: flex;
+            align-items: center;
+            text-align: center;
+            margin: 20px 0;
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .divider::before, .divider::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .divider:not(:empty)::before {
+            margin-right: .5em;
+        }
+
+        .divider:not(:empty)::after {
+            margin-left: .5em;
+        }
+
+        /* Google Button Styling */
+        .btn-google {
+            width: 100%;
+            padding: 14px;
+            background-color: transparent;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            color: var(--text-main);
+            font-size: 15px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-google:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.2);
+            transform: translateY(-1px);
+        }
+
+        .auth-switch {
+            margin-top: 24px;
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .auth-switch a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.2s;
+        }
+
+        .auth-switch a:hover {
+            color: var(--primary-hover);
+        }
+
+        /* Mock Notice */
+        .mock-notice {
+            margin-top: 20px;
+            padding: 10px;
+            background: rgba(30, 215, 96, 0.08);
+            border: 1px dashed rgba(30, 215, 96, 0.3);
+            border-radius: 8px;
+            font-size: 12px;
+            color: var(--primary);
+            line-height: 1.4;
+        }
+    </style>
+</head>
+<body>
+    <div class="ambient-glow-1"></div>
+    <div class="ambient-glow-2"></div>
+
+    <div class="login-container">
+        <div class="logo-wrapper">
+            <img class="logo-img" src="../../external/d25vgoj2qecagr.cloudfront.net/front/logo-dark-v2.svg" alt="ai.video.generater">
+        </div>
+        <h2 id="auth-title">Sign In</h2>
+        <p class="subtitle" id="auth-subtitle">Welcome back to ai.video.generater</p>
+
+        <form id="auth-form" onsubmit="handleAuth(event)">
+            <div class="form-group">
+                <label for="email">Email address</label>
+                <input type="email" id="email" required placeholder="you@example.com" value="user@generater.ai">
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" required placeholder="••••••••" value="password123">
+            </div>
+            
+            <a href="#" class="forgot-pass" id="forgot-link">Forgot password?</a>
+            
+            <button type="submit" class="btn-submit" id="submit-btn">Sign In</button>
+        </form>
+
+        <button type="button" class="btn-google" onclick="handleGoogleLogin()">
+            <svg class="google-icon" viewBox="0 0 24 24" width="20" height="20" xmlns="http://www.w3.org/2000/svg">
+                <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" fill="#FBBC05"/>
+                <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" fill="#EA4335"/>
+            </svg>
+            Continue with Google
+        </button>
+
+        <div class="auth-switch">
+            <span id="switch-text">Don't have an account? </span>
+            <a href="#" id="switch-btn" onclick="toggleAuth(event)">Sign Up</a>
+        </div>
+
+        <div class="mock-notice">
+            🔒 <strong>Offline Mode Active:</strong> You can sign in with Email or Google to bypass network restrictions.
+        </div>
+    </div>
+
+    <script>
+        // Check for signup parameter in URL
+        const urlParams = new URLSearchParams(window.location.search);
+        let isSignUp = urlParams.get('signup') === 'true' || urlParams.get('type') === 'signup';
+        
+        function updateUI() {
+            const title = document.getElementById('auth-title');
+            const subtitle = document.getElementById('auth-subtitle');
+            const submitBtn = document.getElementById('submit-btn');
+            const switchText = document.getElementById('switch-text');
+            const switchBtn = document.getElementById('switch-btn');
+            const forgotLink = document.getElementById('forgot-link');
+
+            if (isSignUp) {
+                title.textContent = 'Create Account';
+                subtitle.textContent = 'Start generating videos with ai.video.generater';
+                submitBtn.textContent = 'Sign Up';
+                switchText.textContent = 'Already have an account? ';
+                switchBtn.textContent = 'Sign In';
+                forgotLink.style.display = 'none';
+            } else {
+                title.textContent = 'Sign In';
+                subtitle.textContent = 'Welcome back to ai.video.generater';
+                submitBtn.textContent = 'Sign In';
+                switchText.textContent = "Don't have an account? ";
+                switchBtn.textContent = 'Sign Up';
+                forgotLink.style.display = 'block';
+            }
+        }
+
+        function toggleAuth(e) {
+            e.preventDefault();
+            isSignUp = !isSignUp;
+            updateUI();
+        }
+
+        function handleAuth(e) {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            
+            // Save mock user in localStorage
+            localStorage.setItem('user_logged_in', 'true');
+            localStorage.setItem('user_email', email);
+            localStorage.setItem('user_name', email.split('@')[0]);
+
+            // Redirect back to homepage with logged_in=true
+            window.location.href = '../../index.html?logged_in=true';
+        }
+
+        function handleGoogleLogin() {
+            // Save mock google user in localStorage
+            localStorage.setItem('user_logged_in', 'true');
+            localStorage.setItem('user_email', 'google.user@generater.ai');
+            localStorage.setItem('user_name', 'Google User');
+
+            // Redirect back to homepage with logged_in=true
+            window.location.href = '../../index.html?logged_in=true';
+        }
+
+        // Initialize UI
+        updateUI();
+    </script>
+</body>
+</html>
