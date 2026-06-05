@@ -1095,7 +1095,7 @@
     </div>
 
     <!-- Google OAuth Consent Modal -->
-    <div id="g-consent-modal" class="modal-overlay" onclick="if(event.target === this) closeConsentModal()">
+    <div id="g-consent-modal" class="modal-overlay" onclick="if(event.target === this) closeConsentModal()" style="z-index: 2000;">
         <div class="modal-content-dialog" style="max-width: 440px; background: #ffffff; color: #3c4043; font-family: 'Roboto', sans-serif;">
             <button class="modal-close-btn" onclick="closeConsentModal()" style="color: #5f6368;">×</button>
             
@@ -1191,15 +1191,38 @@
             <!-- Step 1: Authorization -->
             <div id="yt-step-auth" class="modal-body">
                 <p style="font-size: 13px; margin-bottom: 15px; line-height: 1.4; color: var(--text-muted);">
-                    Paste your YouTube channel link to directly link your account. The AI engine will compile your animated captions into a copyright-free rendering.
+                    Paste your YouTube channel link to establish a connection. You can use the high-fidelity Sandbox simulator or configure a real Google OAuth connection.
                 </p>
+                
                 <div class="modal-input-group" style="margin-bottom: 15px;">
                     <label for="yt-channel-url">YouTube Channel Link</label>
                     <input type="text" id="yt-channel-url" class="modal-input" placeholder="e.g. https://www.youtube.com/@mychannel" style="margin-bottom: 6px;">
-                    <p style="font-size: 11px; color: var(--text-muted); line-height: 1.3;">
-                        Paste your channel URL. The system will establish a connection using our built-in API gateway to upload directly.
-                    </p>
                 </div>
+
+                <div class="modal-input-group" style="margin-bottom: 15px; background: rgba(255,255,255,0.02); padding: 12px; border-radius: 8px; border: 1px solid var(--border-color);">
+                    <label style="font-weight: 700; margin-bottom: 8px; color: #fff;">Connection Method</label>
+                    <div style="display: flex; flex-direction: column; gap: 8px;">
+                        <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: normal; cursor: pointer;">
+                            <input type="radio" name="yt-upload-mode" value="sandbox" checked onclick="toggleYtAuthFields()" style="accent-color: var(--primary);">
+                            <span>Simulated Sandbox (No setup required)</span>
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: normal; cursor: pointer;">
+                            <input type="radio" name="yt-upload-mode" value="real" onclick="toggleYtAuthFields()" style="accent-color: var(--primary);">
+                            <span>Real Upload (Requires Google Client ID)</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div id="yt-real-auth-fields" style="display: none; margin-bottom: 15px;">
+                    <div class="modal-input-group">
+                        <label for="yt-google-client-id">Google OAuth Client ID</label>
+                        <input type="text" id="yt-google-client-id" class="modal-input" placeholder="e.g. 12345-abcde.apps.googleusercontent.com" style="margin-bottom: 4px;">
+                        <p style="font-size: 10px; color: var(--text-muted); line-height: 1.3;">
+                            Don't have one? <a href="https://console.cloud.google.com/" target="_blank" style="color: var(--primary); text-decoration: underline;">Create a project in Google Console</a>, enable YouTube Data API, create OAuth Client Credentials, and paste it here.
+                        </p>
+                    </div>
+                </div>
+                
                 <button class="btn-submit" id="yt-auth-btn" onclick="authorizeYoutube()" style="margin-top: 15px; background: #ff4444; color: white; border: none; font-weight: 700; width: 100%; padding: 14px; border-radius: 10px; cursor: pointer; transition: var(--transition);">
                     🔒 Link Channel & Authorize
                 </button>
@@ -1250,6 +1273,12 @@
                 <div class="modal-input-group">
                     <label>YouTube Link</label>
                     <input type="text" class="modal-input" readonly value="https://youtube.com/shorts/dQw4w9WgXcQ" style="text-align: center; color: var(--primary); font-weight: 600;">
+                </div>
+                <!-- Container to download compiled file in Sandbox mode -->
+                <div class="modal-input-group" id="yt-download-finalized-container" style="margin-top: 15px; display: none; background: rgba(30,215,96,0.05); padding: 12px; border-radius: 8px; border: 1px dashed var(--primary); text-align: left;">
+                    <label style="font-weight: 700; color: #fff; margin-bottom: 4px;">Download Compiled Short</label>
+                    <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 8px;">Since this is in sandbox mode, you can download the generated vertical short to upload it manually to your channel.</p>
+                    <button class="btn-action" id="yt-download-finalized-btn" style="width: 100%; padding: 10px; font-size: 13px; font-weight: 700;">📥 Download Clip WebM</button>
                 </div>
                 <button class="btn-secondary" onclick="closeYoutubeUploadModal()" style="width: 100%; margin-top: 15px; padding: 12px; border-radius: 10px;">Done</button>
             </div>
@@ -1725,6 +1754,7 @@
 
         // Download Function (Triggers dynamic 25-30s vertical clip compiler with custom subtitles)
         function downloadClip(clipNum) {
+            compilerPurpose = 'download';
             compileClipVideo(clipNum);
         }
 
@@ -1732,6 +1762,7 @@
         let compilerVideoElement = null;
         let compilerRecorder = null;
         let compilerInterval = null;
+        let compilerPurpose = 'download'; // 'download' or 'upload'
 
         function cancelCompilation() {
             compilerActive = false;
@@ -1748,6 +1779,13 @@
                 compilerInterval = null;
             }
             document.getElementById('compiler-modal').style.display = 'none';
+            
+            // Re-enable auth button if we cancelled an upload compile
+            const authBtn = document.getElementById('yt-auth-btn');
+            if (authBtn) {
+                authBtn.textContent = "🔒 Link Channel & Authorize";
+                authBtn.disabled = false;
+            }
             showToast("Compilation cancelled.");
         }
 
@@ -1840,21 +1878,28 @@
             
             compilerRecorder.onstop = () => {
                 if (!compilerActive) return;
-                addLog("Finalizing MP4 file container...");
+                addLog("Finalizing Short file container...");
                 const blob = new Blob(chunks, { type: mimeType });
-                const url = URL.createObjectURL(blob);
                 
-                const a = document.createElement("a");
-                a.href = url;
-                a.download = `ai_video_generater_${filenameName}.${extension}`;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
-                
-                modal.style.display = 'none';
-                showToast(`Downloaded "${clip.title}" successfully!`);
-                compilerActive = false;
+                if (compilerPurpose === 'upload') {
+                    addLog("Compilation complete! Closing compiler and uploading to YouTube...");
+                    modal.style.display = 'none';
+                    compilerActive = false;
+                    uploadVideoBlobToYoutube(blob);
+                } else {
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement("a");
+                    a.href = url;
+                    a.download = `ai_video_generater_${filenameName}.${extension}`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                    
+                    modal.style.display = 'none';
+                    showToast(`Downloaded "${clip.title}" successfully!`);
+                    compilerActive = false;
+                }
             };
             
             // Space gradient background variables for animation
@@ -2058,52 +2103,177 @@
                 }, frameDelay);
             }
             
-            // Create hidden video element and test CORS
-            addLog("Attempting to load high-resolution vertical footage...");
+            // Dynamically crawl active CORS Cobalt API instances to stream the actual pasted YouTube video!
+            addLog("Resolving dynamic YouTube video stream proxy via Cobalt API list...");
             
-            compilerVideoElement = document.createElement('video');
-            compilerVideoElement.src = videoUrl;
-            compilerVideoElement.crossOrigin = "anonymous";
-            compilerVideoElement.muted = true;
-            compilerVideoElement.loop = true;
-            compilerVideoElement.playsInline = true;
+            const trackerUrl = "https://instances.cobalt.best/api/instances";
+            const proxiedTrackerUrl = "https://api.allorigins.win/get?url=" + encodeURIComponent(trackerUrl);
             
-            compilerVideoElement.oncanplaythrough = () => {
+            const backupNodes = [
+                "https://api.cobalt.tools",
+                "https://cobalt.api.ryz.cx",
+                "https://api.cobalt.best",
+                "https://cobalt.k6.vc",
+                "https://cobalt.ring.app",
+                "https://co.wuk.sh"
+            ];
+            
+            fetch(proxiedTrackerUrl)
+                .then(r => r.json())
+                .then(corsData => {
+                    const list = JSON.parse(corsData.contents);
+                    let activeNodes = list
+                        .filter(item => item && item.url)
+                        .sort((a, b) => (b.score || 0) - (a.score || 0))
+                        .map(item => item.url);
+                    
+                    const allNodes = [...activeNodes, ...backupNodes];
+                    // Remove duplicates
+                    const uniqueNodes = [...new Set(allNodes)];
+                    
+                    addLog(`Located ${uniqueNodes.length} active download servers. Querying streams...`);
+                    tryNextCobaltNode(uniqueNodes, 0);
+                })
+                .catch(err => {
+                    console.warn("Cobalt instances query failed, using backup nodes directly...", err);
+                    addLog("Cobalt directory unreachable. Querying backup servers...");
+                    tryNextCobaltNode(backupNodes, 0);
+                });
+                
+            function tryNextCobaltNode(nodes, index) {
                 if (!compilerActive) return;
+                if (index >= nodes.length) {
+                    addLog("All Cobalt API servers rate-limited. Falling back to stock vertical video.");
+                    useFallbackStockVideo();
+                    return;
+                }
                 
-                // Test if drawing this video taints the canvas (CORS block check)
-                const testCanvas = document.createElement('canvas');
-                testCanvas.width = 10;
-                testCanvas.height = 10;
-                const testCtx = testCanvas.getContext('2d');
+                const nodeUrl = nodes[index];
+                const cleanNodeName = nodeUrl.replace('https://', '').replace('http://', '');
+                addLog(`Checking connection: ${cleanNodeName}...`);
                 
-                try {
-                    testCtx.drawImage(compilerVideoElement, 0, 0, 10, 10);
-                    testCanvas.toDataURL(); // Throws SecurityError if tainted
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 8000); // 8s timeout per node
+                
+                fetch(nodeUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        url: `https://www.youtube.com/watch?v=${activeYouTubeId}`,
+                        vQuality: "720",
+                        filenamePattern: "basic"
+                    }),
+                    signal: controller.signal
+                })
+                .then(r => {
+                    clearTimeout(timeoutId);
+                    if (!r.ok) throw new Error("HTTP error " + r.status);
+                    return r.json();
+                })
+                .then(data => {
+                    if (!data || (!data.url && data.status === "error")) {
+                        throw new Error(data ? data.text || "Unknown API error" : "Empty response");
+                    }
                     
-                    addLog("CORS authorization confirmed. Drawing footage frame-by-frame.");
-                    drawVideoFootage = true;
+                    const streamUrl = data.url;
+                    if (!streamUrl) throw new Error("No stream URL in response");
                     
-                    compilerVideoElement.play().then(() => {
-                        startRecordingFlow();
-                    }).catch(err => {
-                        addLog("Video play error. Falling back to space animated template.");
+                    addLog("Cobalt stream resolved. Testing CORS access...");
+                    
+                    compilerVideoElement = document.createElement('video');
+                    compilerVideoElement.src = streamUrl;
+                    compilerVideoElement.crossOrigin = "anonymous";
+                    compilerVideoElement.muted = true;
+                    compilerVideoElement.playsInline = true;
+                    
+                    compilerVideoElement.oncanplaythrough = () => {
+                        if (!compilerActive) return;
+                        const testCanvas = document.createElement('canvas');
+                        testCanvas.width = 10;
+                        testCanvas.height = 10;
+                        const testCtx = testCanvas.getContext('2d');
+                        try {
+                            testCtx.drawImage(compilerVideoElement, 0, 0, 10, 10);
+                            testCanvas.toDataURL(); // Throws SecurityError if tainted
+                            
+                            addLog("✓ CORS boundary cleared! Streaming actual YouTube video.");
+                            drawVideoFootage = true;
+                            
+                            // Set start time corresponding to the card's mock highlight start
+                            const clipStartTime = clip.startTime || 0;
+                            compilerVideoElement.currentTime = clipStartTime;
+                            
+                            compilerVideoElement.play().then(() => {
+                                startRecordingFlow();
+                            }).catch(err => {
+                                addLog("Autoplay failed. Falling back to background template.");
+                                drawVideoFootage = false;
+                                startRecordingFlow();
+                            });
+                        } catch (e) {
+                            compilerVideoElement.remove();
+                            addLog("CORS authorization denied for stream. Trying next server...");
+                            tryNextCobaltNode(nodes, index + 1);
+                        }
+                    };
+                    
+                    compilerVideoElement.onerror = () => {
+                        compilerVideoElement.remove();
+                        addLog("Stream load failure. Trying next server...");
+                        tryNextCobaltNode(nodes, index + 1);
+                    };
+                })
+                .catch(err => {
+                    clearTimeout(timeoutId);
+                    addLog(`Node timed out or failed (${err.message || "Timeout"}). Trying next...`);
+                    tryNextCobaltNode(nodes, index + 1);
+                });
+            }
+            
+            function useFallbackStockVideo() {
+                if (!compilerActive) return;
+                compilerVideoElement = document.createElement('video');
+                compilerVideoElement.src = videoUrl;
+                compilerVideoElement.crossOrigin = "anonymous";
+                compilerVideoElement.muted = true;
+                compilerVideoElement.loop = true;
+                compilerVideoElement.playsInline = true;
+                
+                compilerVideoElement.oncanplaythrough = () => {
+                    if (!compilerActive) return;
+                    const testCanvas = document.createElement('canvas');
+                    testCanvas.width = 10;
+                    testCanvas.height = 10;
+                    const testCtx = testCanvas.getContext('2d');
+                    try {
+                        testCtx.drawImage(compilerVideoElement, 0, 0, 10, 10);
+                        testCanvas.toDataURL();
+                        
+                        addLog("Stock footage CORS cleared. Compiling video.");
+                        drawVideoFootage = true;
+                        compilerVideoElement.play().then(() => {
+                            startRecordingFlow();
+                        }).catch(e => {
+                            drawVideoFootage = false;
+                            startRecordingFlow();
+                        });
+                    } catch (e) {
+                        addLog("Stock footage CORS blocked. Compiling premium particles fallback.");
                         drawVideoFootage = false;
                         startRecordingFlow();
-                    });
-                } catch (e) {
-                    addLog("CORS domain boundary restricted. Falling back to ContentID-immune particle layout.");
+                    }
+                };
+                
+                compilerVideoElement.onerror = () => {
+                    if (!compilerActive) return;
+                    addLog("Stock footage offline. Compiling premium particles fallback.");
                     drawVideoFootage = false;
                     startRecordingFlow();
-                }
-            };
-            
-            compilerVideoElement.onerror = (e) => {
-                if (!compilerActive) return;
-                addLog("Footage offline or blocked. Compiling dynamic text-clip container.");
-                drawVideoFootage = false;
-                startRecordingFlow();
-            };
+                };
+            }
         }
         
         function triggerMockDownload(filename) {
@@ -2171,6 +2341,11 @@
         // YouTube Direct Upload Integration
         let currentUploadingClipNum = null;
 
+        // YouTube Direct Upload Integration
+        let currentUploadingClipNum = null;
+        let lastSimulatedBlob = null;
+        let lastSimulatedFilename = "clip";
+
         function openYoutubeUploadModal(clipNum) {
             currentUploadingClipNum = clipNum;
             const titleField = document.getElementById('yt-title-input');
@@ -2181,6 +2356,14 @@
             // Auto-populate saved Channel URL if exists
             const savedChannelUrl = localStorage.getItem('yt_channel_url') || '';
             document.getElementById('yt-channel-url').value = savedChannelUrl;
+
+            // Auto-populate Client ID if exists
+            const savedClientId = localStorage.getItem('yt_google_client_id') || '';
+            const clientIdField = document.getElementById('yt-google-client-id');
+            if (clientIdField) clientIdField.value = savedClientId;
+            
+            // Hide the download compiled container on success modal init
+            document.getElementById('yt-download-finalized-container').style.display = 'none';
             
             document.getElementById('yt-upload-modal').style.display = 'flex';
             resetYoutubeUploadModal();
@@ -2197,11 +2380,21 @@
             document.getElementById('yt-step-success').style.display = 'none';
         }
 
+        function toggleYtAuthFields() {
+            const mode = document.querySelector('input[name="yt-upload-mode"]:checked').value;
+            const fields = document.getElementById('yt-real-auth-fields');
+            if (mode === 'real') {
+                fields.style.display = 'block';
+            } else {
+                fields.style.display = 'none';
+            }
+        }
+
         let selectedGoogleName = "Avinash";
         let selectedGoogleEmail = "avinash090307@gmail.com";
 
         function authorizeYoutube() {
-            let channelUrl = document.getElementById('yt-channel-url').value.trim();
+            const channelUrl = document.getElementById('yt-channel-url').value.trim();
             const authBtn = document.getElementById('yt-auth-btn');
             
             if (!channelUrl) {
@@ -2209,15 +2402,122 @@
                 return;
             }
 
-            // Show simulated Google OAuth Consent Modal
-            document.getElementById('g-consent-modal').style.display = 'flex';
-            document.getElementById('g-step-chooser').style.display = 'block';
-            document.getElementById('g-step-consent').style.display = 'none';
-            document.getElementById('g-custom-input').style.display = 'none';
-            document.getElementById('g-custom-email').value = '';
-            
-            authBtn.textContent = "Connecting...";
-            authBtn.disabled = true;
+            const mode = document.querySelector('input[name="yt-upload-mode"]:checked').value;
+
+            if (mode === 'real') {
+                const clientId = document.getElementById('yt-google-client-id').value.trim();
+                if (!clientId) {
+                    alert("Please enter your Google OAuth Client ID.");
+                    return;
+                }
+                localStorage.setItem('yt_google_client_id', clientId);
+                
+                authBtn.textContent = "Connecting...";
+                authBtn.disabled = true;
+
+                if (typeof google === 'undefined' || !google.accounts || !google.accounts.oauth2) {
+                    alert("Google OAuth API client libraries not loaded. Please verify you are online.");
+                    authBtn.textContent = "🔒 Link Channel & Authorize";
+                    authBtn.disabled = false;
+                    return;
+                }
+
+                try {
+                    const tokenClient = google.accounts.oauth2.initTokenClient({
+                        client_id: clientId,
+                        scope: 'https://www.googleapis.com/auth/youtube.upload https://www.googleapis.com/auth/youtube.readonly',
+                        callback: (tokenResponse) => {
+                            if (tokenResponse.error) {
+                                alert("Google authorization failed: " + tokenResponse.error);
+                                authBtn.textContent = "🔒 Link Channel & Authorize";
+                                authBtn.disabled = false;
+                                return;
+                            }
+                            
+                            localStorage.setItem('yt_access_token', tokenResponse.access_token);
+                            localStorage.setItem('yt_upload_mode', 'real');
+                            
+                            // Query user details from YouTube API
+                            fetch('https://www.googleapis.com/youtube/v3/channels?part=snippet&mine=true', {
+                                headers: {
+                                    'Authorization': `Bearer ${tokenResponse.access_token}`
+                                }
+                            })
+                            .then(res => res.json())
+                            .then(channelData => {
+                                let displayHandle = "@mychannel";
+                                if (channelData.items && channelData.items.length > 0) {
+                                    const snippet = channelData.items[0].snippet;
+                                    displayHandle = snippet.customUrl || snippet.title || "@mychannel";
+                                }
+                                localStorage.setItem('yt_channel_handle', displayHandle);
+                                
+                                let cleanUrl = channelUrl;
+                                if (!/^https?:\/\//i.test(cleanUrl)) {
+                                    cleanUrl = 'https://' + cleanUrl;
+                                }
+                                localStorage.setItem('yt_channel_url', cleanUrl);
+                                
+                                const badge = document.getElementById('yt-linked-channel-badge');
+                                if (badge) {
+                                    badge.textContent = `🔗 Linked to: ${displayHandle} (Real OAuth)`;
+                                }
+                                
+                                authBtn.textContent = "🔒 Link Channel & Authorize";
+                                authBtn.disabled = false;
+
+                                document.getElementById('yt-step-auth').style.display = 'none';
+                                document.getElementById('yt-step-upload').style.display = 'block';
+                                
+                                showToast("Google account connected successfully!");
+                            })
+                            .catch(err => {
+                                console.warn("Failed to fetch channel details", err);
+                                // Fallback
+                                const displayHandle = channelUrl.includes("@") ? "@" + channelUrl.split("@")[1].split("/")[0] : "@mychannel";
+                                localStorage.setItem('yt_channel_handle', displayHandle);
+                                
+                                let cleanUrl = channelUrl;
+                                if (!/^https?:\/\//i.test(cleanUrl)) {
+                                    cleanUrl = 'https://' + cleanUrl;
+                                }
+                                localStorage.setItem('yt_channel_url', cleanUrl);
+
+                                const badge = document.getElementById('yt-linked-channel-badge');
+                                if (badge) {
+                                    badge.textContent = `🔗 Linked to: ${displayHandle} (Real OAuth)`;
+                                }
+
+                                authBtn.textContent = "🔒 Link Channel & Authorize";
+                                authBtn.disabled = false;
+
+                                document.getElementById('yt-step-auth').style.display = 'none';
+                                document.getElementById('yt-step-upload').style.display = 'block';
+                                showToast("Authorized Google account.");
+                            });
+                        }
+                    });
+                    
+                    tokenClient.requestAccessToken({ prompt: 'consent' });
+                } catch (e) {
+                    alert("Failed to initialize Google OAuth: " + e.message);
+                    authBtn.textContent = "🔒 Link Channel & Authorize";
+                    authBtn.disabled = false;
+                }
+            } else {
+                // Sandbox simulated flow
+                localStorage.setItem('yt_upload_mode', 'sandbox');
+                
+                // Show simulated Google OAuth Consent Modal
+                document.getElementById('g-consent-modal').style.display = 'flex';
+                document.getElementById('g-step-chooser').style.display = 'block';
+                document.getElementById('g-step-consent').style.display = 'none';
+                document.getElementById('g-custom-input').style.display = 'none';
+                document.getElementById('g-custom-email').value = '';
+                
+                authBtn.textContent = "Connecting...";
+                authBtn.disabled = true;
+            }
         }
 
         function selectGoogleAccount(name, email) {
@@ -2416,53 +2716,193 @@
                 return;
             }
             
-            document.getElementById('yt-step-upload').style.display = 'none';
-            document.getElementById('yt-step-progress').style.display = 'block';
+            const uploadMode = localStorage.getItem('yt_upload_mode') || 'sandbox';
+            const handle = localStorage.getItem('yt_channel_handle') || '@mychannel';
+
+            if (uploadMode === 'real') {
+                // Real Google OAuth multipart upload!
+                const accessToken = localStorage.getItem('yt_access_token');
+                if (!accessToken) {
+                    alert("Authorization token missing. Please link channel again.");
+                    resetYoutubeUploadModal();
+                    return;
+                }
+
+                // Hide step 2 dialog
+                document.getElementById('yt-step-upload').style.display = 'none';
+                
+                // Trigger canvas compiler using 'upload' purpose
+                compilerPurpose = 'upload';
+                showToast("Starting high-resolution clip compilation...");
+                compileClipVideo(currentUploadingClipNum);
+            } else {
+                // Simulated Upload Flow
+                document.getElementById('yt-step-upload').style.display = 'none';
+                document.getElementById('yt-step-progress').style.display = 'block';
+                
+                const bar = document.getElementById('yt-progress-bar');
+                const percentText = document.getElementById('yt-progress-percent');
+                bar.style.width = '0%';
+                percentText.textContent = '0%';
+                
+                showToast("Generating copyright-safe dynamic video stream...");
+                
+                const clip = clipsData.find(c => c.id === currentUploadingClipNum);
+                lastSimulatedFilename = clip ? clip.title.toLowerCase().replace(/[^a-z0-9]+/g, '_') : "clip";
+                
+                // Step A: Generate the unique, clean canvas video
+                generateCanvasVideo(title, (videoBlob) => {
+                    showToast(`Video compiled. Uploading to ${handle}...`);
+                    
+                    // Show download button on success modal
+                    document.getElementById('yt-download-finalized-container').style.display = 'block';
+                    document.getElementById('yt-download-finalized-btn').onclick = () => {
+                        if (lastSimulatedBlob) {
+                            const url = URL.createObjectURL(lastSimulatedBlob);
+                            const a = document.createElement("a");
+                            a.href = url;
+                            a.download = `ai_video_generater_${lastSimulatedFilename}.webm`;
+                            document.body.appendChild(a);
+                            a.click();
+                            document.body.removeChild(a);
+                            URL.revokeObjectURL(url);
+                            showToast("Downloaded Short video file!");
+                        }
+                    };
+                    
+                    let pct = 0;
+                    const interval = setInterval(() => {
+                        pct += 5;
+                        bar.style.width = pct + '%';
+                        percentText.textContent = pct + '%';
+                        
+                        if (pct >= 100) {
+                            clearInterval(interval);
+                            
+                            // Step C: Upload Completed
+                            setTimeout(() => {
+                                const channelUrl = localStorage.getItem('yt_channel_url') || 'https://youtube.com';
+                                
+                                const linkField = document.querySelector('#yt-step-success input');
+                                if (linkField) linkField.value = channelUrl;
+                                
+                                const linkContainer = document.querySelector('#yt-step-success label');
+                                if (linkContainer) {
+                                    linkContainer.innerHTML = `YouTube Channel (<a href="${channelUrl}" target="_blank" style="color: var(--primary); text-decoration: underline;">Open Channel Page</a>)`;
+                                }
+                                
+                                document.getElementById('yt-step-progress').style.display = 'none';
+                                document.getElementById('yt-step-success').style.display = 'block';
+                                showToast(`Short successfully published live to ${handle}!`);
+                            }, 400);
+                        }
+                    }, 100);
+                });
+            }
+        }
+
+        // Real Google YouTube multipart upload helper
+        function uploadVideoBlobToYoutube(videoBlob) {
+            const title = document.getElementById('yt-title-input').value.trim();
+            const desc = document.getElementById('yt-desc-input').value.trim();
+            const visibility = document.getElementById('yt-visibility-select').value;
+            const accessToken = localStorage.getItem('yt_access_token');
+            const handle = localStorage.getItem('yt_channel_handle') || '@mychannel';
             
+            document.getElementById('yt-step-progress').style.display = 'block';
             const bar = document.getElementById('yt-progress-bar');
             const percentText = document.getElementById('yt-progress-percent');
+            const statusEl = document.querySelector('#yt-step-progress p');
+            
+            statusEl.textContent = `Uploading clip to ${handle} via Google API...`;
             bar.style.width = '0%';
             percentText.textContent = '0%';
             
-            const handle = localStorage.getItem('yt_channel_handle') || '@mychannel';
+            // Construct multipart metadata
+            const metadata = {
+                snippet: {
+                    title: title,
+                    description: desc,
+                    categoryId: '22' // People & Blogs
+                },
+                status: {
+                    privacyStatus: visibility,
+                    selfDeclaredMadeForKids: false
+                }
+            };
             
-            // Real Mode Simulator for Channel Upload
-            showToast("Generating copyright-safe dynamic video stream...");
+            const boundary = 'yt_upload_boundary';
+            const initDelimiter = `--${boundary}\r\n`;
+            const delimiter = `\r\n--${boundary}\r\n`;
+            const closeDelimiter = `\r\n--${boundary}--`;
             
-            // Step A: Generate the unique, clean canvas video
-            generateCanvasVideo(title, (videoBlob) => {
-                showToast(`Video compiled. Uploading to ${handle}...`);
+            const reader = new FileReader();
+            reader.readAsArrayBuffer(videoBlob);
+            reader.onload = function(e) {
+                const videoBuffer = e.target.result;
+                const metadataPart = 'Content-Type: application/json; charset=UTF-8\r\n\r\n' + JSON.stringify(metadata);
                 
-                let pct = 0;
-                const interval = setInterval(() => {
-                    pct += 5;
-                    bar.style.width = pct + '%';
-                    percentText.textContent = pct + '%';
-                    
-                    if (pct >= 100) {
-                        clearInterval(interval);
-                        
-                        // Step C: Upload Completed
-                        setTimeout(() => {
-                            // Use the actual pasted channel link to prevent 404 pages on YouTube
-                            const channelUrl = localStorage.getItem('yt_channel_url') || 'https://youtube.com';
+                const encoder = new TextEncoder();
+                const metaHeaderBuffer = encoder.encode(initDelimiter + metadataPart + delimiter + 'Content-Type: ' + videoBlob.type + '\r\n\r\n');
+                const footerBuffer = encoder.encode(closeDelimiter);
+                
+                const totalLength = metaHeaderBuffer.byteLength + videoBuffer.byteLength + footerBuffer.byteLength;
+                const combinedBuffer = new Uint8Array(totalLength);
+                
+                combinedBuffer.set(metaHeaderBuffer, 0);
+                combinedBuffer.set(new Uint8Array(videoBuffer), metaHeaderBuffer.byteLength);
+                combinedBuffer.set(footerBuffer, metaHeaderBuffer.byteLength + videoBuffer.byteLength);
+                
+                const xhr = new XMLHttpRequest();
+                xhr.open('POST', 'https://www.googleapis.com/upload/youtube/v3/videos?uploadType=multipart&part=snippet,status');
+                xhr.setRequestHeader('Authorization', `Bearer ${accessToken}`);
+                xhr.setRequestHeader('Content-Type', `multipart/related; boundary=${boundary}`);
+                xhr.setRequestHeader('Accept', 'application/json');
+                
+                xhr.upload.onprogress = function(event) {
+                    if (event.lengthComputable) {
+                        const pct = Math.round((event.loaded / event.total) * 100);
+                        bar.style.width = pct + '%';
+                        percentText.textContent = pct + '%';
+                    }
+                };
+                
+                xhr.onload = function() {
+                    if (xhr.status >= 200 && xhr.status < 300) {
+                        try {
+                            const response = JSON.parse(xhr.responseText);
+                            const videoId = response.id || 'dQw4w9WgXcQ';
+                            const videoUrl = `https://youtube.com/shorts/${videoId}`;
                             
                             const linkField = document.querySelector('#yt-step-success input');
-                            if (linkField) linkField.value = channelUrl;
+                            if (linkField) linkField.value = videoUrl;
                             
-                            // Set the click link
                             const linkContainer = document.querySelector('#yt-step-success label');
                             if (linkContainer) {
-                                linkContainer.innerHTML = `YouTube Channel (<a href="${channelUrl}" target="_blank" style="color: var(--primary); text-decoration: underline;">Open Channel Page</a>)`;
+                                linkContainer.innerHTML = `YouTube Short (<a href="${videoUrl}" target="_blank" style="color: var(--primary); text-decoration: underline;">Open Short Video</a>)`;
                             }
                             
                             document.getElementById('yt-step-progress').style.display = 'none';
                             document.getElementById('yt-step-success').style.display = 'block';
-                            showToast(`Short successfully published live to ${handle}!`);
-                        }, 400);
+                            showToast(`Published successfully to YouTube!`);
+                        } catch (err) {
+                            alert("Failed to parse YouTube upload response details.");
+                            resetYoutubeUploadModal();
+                        }
+                    } else {
+                        console.error("YouTube upload response error", xhr.responseText);
+                        alert("YouTube upload failed. Status: " + xhr.status + "\n" + xhr.responseText);
+                        resetYoutubeUploadModal();
                     }
-                }, 100);
-            });
+                };
+                
+                xhr.onerror = function() {
+                    alert("Network error during YouTube upload.");
+                    resetYoutubeUploadModal();
+                };
+                
+                xhr.send(combinedBuffer);
+            };
         }
 
         // Show toast notification
@@ -2475,7 +2915,7 @@
             }, 3000);
         }
 
-        // Download full YouTube video in MP4 (redirects to pre-loaded y2mate downloader to bypass CORS/Cloudflare restrictions)
+        // Download full YouTube video in MP4 directly using Cobalt APIs
         function downloadFullVideo() {
             const urlInput = document.getElementById('clipper-url').value.trim();
             const videoId = getYouTubeId(urlInput);
@@ -2486,19 +2926,98 @@
             
             const btn = document.getElementById('download-full-video-btn');
             const originalText = btn.innerHTML;
-            btn.innerHTML = "<span>⏳</span> Opening MP4 Downloader...";
+            btn.innerHTML = "<span>⏳</span> Resolving MP4 Download...";
             btn.disabled = true;
             
-            showToast("Opening high-speed MP4 downloader in new tab...");
+            showToast("Searching Cobalt download proxies for MP4 link...");
             
-            // Redirects to pre-loaded y2mate converter to download the real MP4 file directly
-            const downloadUrl = `https://www.youtubepp.com/watch?v=${videoId}`;
-            window.open(downloadUrl, "_blank");
+            const trackerUrl = "https://instances.cobalt.best/api/instances";
+            const proxiedTrackerUrl = "https://api.allorigins.win/get?url=" + encodeURIComponent(trackerUrl);
             
-            setTimeout(() => {
-                btn.innerHTML = originalText;
-                btn.disabled = false;
-            }, 1200);
+            const backupNodes = [
+                "https://api.cobalt.tools",
+                "https://cobalt.api.ryz.cx",
+                "https://api.cobalt.best",
+                "https://cobalt.k6.vc",
+                "https://cobalt.ring.app",
+                "https://co.wuk.sh"
+            ];
+            
+            fetch(proxiedTrackerUrl)
+                .then(r => r.json())
+                .then(corsData => {
+                    const list = JSON.parse(corsData.contents);
+                    let activeNodes = list
+                        .filter(item => item && item.url)
+                        .sort((a, b) => (b.score || 0) - (a.score || 0))
+                        .map(item => item.url);
+                    
+                    const allNodes = [...activeNodes, ...backupNodes];
+                    const uniqueNodes = [...new Set(allNodes)];
+                    tryNextDownloadNode(uniqueNodes, 0);
+                })
+                .catch(() => {
+                    tryNextDownloadNode(backupNodes, 0);
+                });
+                
+            function tryNextDownloadNode(nodes, index) {
+                if (index >= nodes.length) {
+                    showToast("All Cobalt servers rate-limited. Redirecting to backup downloader...");
+                    // Fall back to old method
+                    const downloadUrl = `https://www.youtubepp.com/watch?v=${videoId}`;
+                    window.open(downloadUrl, "_blank");
+                    
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                    return;
+                }
+                
+                const nodeUrl = nodes[index];
+                const cleanNodeName = nodeUrl.replace('https://', '').replace('http://', '');
+                
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 6000);
+                
+                fetch(nodeUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        url: `https://www.youtube.com/watch?v=${videoId}`,
+                        vQuality: "720",
+                        filenamePattern: "basic"
+                    }),
+                    signal: controller.signal
+                })
+                .then(r => {
+                    clearTimeout(timeoutId);
+                    if (!r.ok) throw new Error("HTTP error");
+                    return r.json();
+                })
+                .then(data => {
+                    if (data && data.url) {
+                        showToast("MP4 download link resolved! Starting download...");
+                        const a = document.createElement("a");
+                        a.href = data.url;
+                        a.download = `ai_video_generater_full_${videoId}.mp4`;
+                        a.target = "_blank";
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                        
+                        btn.innerHTML = originalText;
+                        btn.disabled = false;
+                    } else {
+                        throw new Error("No URL");
+                    }
+                })
+                .catch(() => {
+                    clearTimeout(timeoutId);
+                    tryNextDownloadNode(nodes, index + 1);
+                });
+            }
         }
 
         // Log out
